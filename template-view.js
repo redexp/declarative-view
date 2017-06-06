@@ -37,6 +37,8 @@
 	}
 
 	extend(TemplateView, {
+		$: $,
+
 		currentId: 0,
 
 		/**
@@ -390,26 +392,6 @@
 			args.push(true);
 
 			return this.listenOn.apply(this, args);
-		},
-
-		/**
-		 * @param {Node} node
-		 * @param {string} events
-		 * @param {Function} callback
-		 * @returns {TemplateView}
-		 */
-		listenNode: function (node, events, callback) {
-			return this.listenTo({
-				target: node,
-				events: events,
-				callback: callback,
-				on: function (node, events, callback) {
-				    node.addEventListener(events, callback, false);
-				},
-				off: function (node, events, callback) {
-				    node.removeEventListener(events, callback);
-				}
-			});
 		},
 
 		find: function (selector) {
