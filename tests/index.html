@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tests</title>
+
+  <link rel="stylesheet" href="../libs/mocha/mocha.css"/>
+</head>
+<body>
+<div id="mocha"></div>
+
+<script src="../libs/mocha/mocha.js"></script>
+<script src="../libs/chai/chai.js"></script>
+<script src="../libs/jquery/dist/jquery.min.js"></script>
+<script src="../libs/chai-jquery/chai-jquery.js"></script>
+<script src="../libs/sinon/pkg/sinon-no-sourcemaps.js"></script>
+<script src="../libs/sinon-chai/lib/sinon-chai.js"></script>
+<script src="../template-view.js"></script>
+
+<script>mocha.setup('bdd');window.expect = chai.expect;</script>
+<script src="events.js"></script>
+<script>mocha.run();</script>
+</body>
+</html>

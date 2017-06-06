@@ -15,12 +15,16 @@
 
 	var doc = window.document;
 
+	var $ = window.jQuery;
+
 	function TemplateView(options) {
+		options = options || {};
+
 		this.id = TemplateView.nextId();
 		this.events = {};
 		this.listeners = [];
 		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
-		this.node = toNode(options.node);
+		this.node = $(options.node || '<div>');
 
 		if (options.parent) {
 			this.parent = options.parent;
@@ -775,4 +779,6 @@
 	function slice(arr, start) {
 	    return Array.prototype.slice.call(arr, start);
 	}
+
+	return TemplateView;
 });

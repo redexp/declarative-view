@@ -1,0 +1,29 @@
+{
+  "name": "template-view",
+  "main": "template-view.js",
+  "homepage": "https://github.com/redexp/template-view",
+  "authors": [
+    "Sergii Kliuchnyk"
+  ],
+  "description": "Template view",
+  "keywords": [
+    "view"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "libs",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jquery": "^3.2.1",
+    "mocha": "^3.4.2",
+    "chai": "^4.0.1",
+    "chai-jquery": "^2.0.1",
+    "sinon": "^2.3.2",
+    "sinon-chai": "^2.10.0"
+  }
+}

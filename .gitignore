@@ -1,6 +1,6 @@
-.idea
-
-node_modules
+/.idea
+/node_modules
 .npm
 .node_repl_history
 npm-debug.log*
+/libs
