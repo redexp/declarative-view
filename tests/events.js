@@ -52,7 +52,7 @@ describe('Events', function () {
 		expect(cb).have.callCount(7);
 	});
 
-    it('listenOn, stopListening', function () {
+    it('listenOn, stopListening, listenOnce', function () {
 		var view = new TemplateView();
 		var node = view.node;
 
@@ -134,5 +134,27 @@ describe('Events', function () {
 		view2.trigger('test2');
 
 		expect(cb).have.callCount(11);
+
+		view.listenOnce(view2, 'test1 test2', cb);
+		view2.trigger('test1');
+
+		expect(cb).have.callCount(12);
+
+		view2.trigger('test1');
+
+		expect(cb).have.callCount(12);
+
+		view2.trigger('test2');
+
+		expect(cb).have.callCount(13);
+
+		view2.trigger('test2');
+
+		expect(cb).have.callCount(13);
+
+		expect(view.events).to.be.empty;
+		expect(view.listeners).to.be.empty;
+		expect(view2.events).to.be.empty;
+		expect(view2.listeners).to.be.empty;
     });
 });

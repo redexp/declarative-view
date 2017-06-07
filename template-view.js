@@ -13,8 +13,6 @@
 	 */
 	var _DEV_ = true;
 
-	var doc = window.document;
-
 	var $ = window.jQuery;
 
 	function TemplateView(options) {
@@ -139,6 +137,10 @@
 					spliceBy(callbacks, findItem(callbacks, function (params) {
 					    return params.callback === callback;
 					}));
+
+					if (callbacks.length === 0) {
+						delete this.events[event];
+					}
 				}
 				else {
 					delete this.events[event];
@@ -197,13 +199,11 @@
 		/**
 		 * @param {{
 		 * 	target: Object,
-		 * 	onMethod: string,
-		 * 	offMethod: string,
 		 * 	events: string,
-		 * 	callback: Function,
-		 * 	onExtraArgs?: Array,
-		 * 	offExtraArgs?: Array,
-		 * 	once?: boolean }} params
+		 * 	callback: function,
+		 * 	once: boolean,
+		 * 	on: function,
+		 * 	off: function }} params
 		 * @returns {TemplateView}
 		 */
 		listenTo: function (params) {
@@ -211,51 +211,46 @@
 				target = params.target,
 				events = params.events,
 				callback = params.callback,
-				listenBy = '_listenBy' + this.id,
-				cb = callback[listenBy];
+				once = params.once;
 
-			if (!cb) {
-				cb = callback[listenBy] = function () {
-					if (cb.once) {
-						view.stopListening(target, cb.once, callback);
-					}
-
-					return callback.apply(view, arguments);
-				};
-			}
-
-			if (params.once) {
-				cb.once = (cb.once ? cb.once + ' ' : '') + params.events;
-			}
-
-			params.on(target, events, cb);
-
-			var item = findItem(this.listeners, function (item) {
-			    return item.target === target;
+			var listener = findItem(this.listeners, function (listener) {
+			    return listener.target === target;
 			});
 
-			if (!item) {
-				item = {
+			if (!listener) {
+				listener = {
 					target: target,
 					off: params.off,
 					events: {}
 				};
 
-				this.listeners.push(item);
+				this.listeners.push(listener);
 			}
 
 			events = splitEvents(events);
 
-			for (var i = 0, len = events.length; i < len; i++) {
-				var event = events[i],
-					callbacks = item.events[event];
+			events.forEach(function (event) {
+				var callbacks = listener.events[event];
 
 				if (!callbacks) {
-					callbacks = item.events[event] = [];
+					callbacks = listener.events[event] = [];
 				}
 
-				callbacks.push(callback);
-			}
+				var wrapper = function () {
+					if (once) {
+						view.stopListening(target, event, callback);
+					}
+
+					return callback.apply(view, arguments);
+				};
+
+				callbacks.push({
+					origin: callback,
+					wrapper: wrapper
+				});
+
+				params.on(target, event, wrapper);
+			});
 
 			return this;
 		},
@@ -267,8 +262,7 @@
 		 * @returns {TemplateView}
 		 */
 		stopListening: function (target, events, callback) {
-			var listener,
-				listenBy = '_listenBy' + this.id;
+			var listener;
 
 			if (target) {
 				listener = findItem(this.listeners, function (listener) {
@@ -294,7 +288,7 @@
 					if (!listener.events.hasOwnProperty(event)) continue;
 
 					listener.events[event].forEach(function (callback) {
-						listener.off(target, event, callback[listenBy]);
+						listener.off(target, event, callback.wrapper);
 					});
 				}
 
@@ -306,7 +300,7 @@
 					if (!listener.events.hasOwnProperty(event)) return;
 
 					listener.events[event].forEach(function (callback) {
-						listener.off(target, event, callback[listenBy]);
+						listener.off(target, event, callback.wrapper);
 					});
 
 					delete listener.events[events];
@@ -314,24 +308,28 @@
 				break;
 
 			case 3:
-				var cb = callback[listenBy];
-
-				if (!cb) return this;
-
 				events.forEach(function (event) {
 					var callbacks = listener.events[event];
 
 					if (!callbacks) return;
 
-					listener.off(target, event, cb);
+					callbacks.forEach(function (cb) {
+					    if (cb.origin !== callback) return;
 
-					spliceBy(callbacks, callback);
+						listener.off(target, event, cb.wrapper);
+
+						spliceBy(callbacks, cb);
+					});
 					
 					if (callbacks.length === 0) {
 						delete listener.events[event];
 					}
 				});
 				break;
+			}
+
+			if (listener && emptyObject(listener.events)) {
+				spliceBy(this.listeners, listener);
 			}
 
 			return this;
@@ -366,13 +364,16 @@
 				    target.on.apply(target, args);
 				},
 				off: function (target, events, callback) {
-					var args = [];
+					var args;
 
 					if (callback) {
 						args = [events, callback];
 					}
 					else if (events) {
 						args = [events];
+					}
+					else {
+						args = [];
 					}
 
 				    target.off.apply(target, args);
@@ -734,10 +735,6 @@
 		return target;
 	}
 
-	function toNode(source) {
-		return typeof source === 'string' ? doc.querySelector(source) : source;
-	}
-
 	function spliceBy(arr, item) {
 	    var index = arr.indexOf(item);
 	    if (index === -1) return;
@@ -760,6 +757,14 @@
 
 	function slice(arr, start) {
 	    return Array.prototype.slice.call(arr, start);
+	}
+
+	function emptyObject(obj) {
+	    for (var name in obj) {
+	    	if (obj.hasOwnProperty(name)) return false;
+		}
+
+		return true;
 	}
 
 	return TemplateView;
