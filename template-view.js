@@ -28,10 +28,24 @@
 			this.parent = options.parent;
 		}
 
-		this.ui = extend({root: this.node}, extendPrototypeProp({object: this, prop: 'ui', deep: false}));
+		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
 		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
 
-		TemplateView.helpers.template(this, 'root', this.template);
+		if (options.ui) {
+			extendDeep(this.ui, options.ui);
+		}
+
+		if (options.template) {
+			extendDeep(this.template, options.template);
+		}
+
+		for (var name in this.ui) {
+			if (!this.ui.hasOwnProperty(name)) continue;
+
+			ensureUI(this, name);
+		}
+
+		TemplateView.helpers.template(this, '', this.template);
 	}
 
 	extend(TemplateView, {
@@ -48,6 +62,10 @@
 	});
 
 	extend(TemplateView.prototype, {
+		ui: {
+			root: ''
+		},
+
 		/**
 		 * @param {string} name
 		 * @returns {*}
@@ -396,7 +414,15 @@
 		},
 
 		find: function (selector) {
-			return this.node.querySelectorAll(selector);
+			if (selector.indexOf('@') > -1) {
+				var view = this;
+
+				selector = selector.replace(/@(\w+)/, function (x, name) {
+					return ensureUI(view, name).uiSelector;
+				});
+			}
+
+			return selector ? this.node.find(selector) : this.node;
 		}
 	});
 
@@ -407,6 +433,7 @@
 		attr: attrHelper,
 		prop: propHelper,
 		style: styleHelper,
+		css: styleHelper,
 		html: htmlHelper,
 		text: textHelper,
 		on: onHelper,
@@ -416,10 +443,6 @@
 	//region ====================== Helpers =======================================
 
 	function templateHelper(view, root, template) {
-		if (view.ui.hasOwnProperty(root)) {
-			root = '{' + root + '}';
-		}
-
 		for (var selector in template) {
 			if (!template.hasOwnProperty(selector)) return;
 
@@ -671,6 +694,8 @@
 
 	//endregion
 
+	//region ====================== Utils =========================================
+
 	function extend(target, source) {
 	    for (var name in source) {
 	    	if (!source.hasOwnProperty(name)) continue;
@@ -685,9 +710,15 @@
 		for (var name in source) {
 			if (!source.hasOwnProperty(name)) continue;
 
-			var value = source[name];
-
-			target[name] = typeof value === 'object' && value ? extendDeep(target[name], value) : value;
+			target[name] = (
+				target[name] &&
+				source[name] &&
+				typeof target[name] === 'object' &&
+				typeof source[name] === 'object'
+			) ?
+				extendDeep(target[name], source[name]) :
+				source[name]
+			;
 		}
 
 		return target;
@@ -766,6 +797,29 @@
 
 		return true;
 	}
+
+	function ensureUI(view, name) {
+		var selector = view.ui[name];
+
+		if (typeof selector === 'string') {
+			selector = selector.replace(/@(\w+)/g, function (x, name) {
+				return ensureUI(view, name).uiSelector;
+			});
+
+			view.ui[name] = selector ? view.node.find(selector) : view.node;
+			view.ui[name].uiSelector = selector;
+		}
+
+		if (_DEV_) {
+			if (typeof selector === 'undefined') {
+				throw new Error('Undefined ui alias "' + name + '" in view ' + this.constructor.name);
+			}
+		}
+
+		return view.ui[name];
+	}
+
+	//endregion
 
 	return TemplateView;
 });
