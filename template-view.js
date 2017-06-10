@@ -21,15 +21,19 @@
 		this.id = TemplateView.nextId();
 		this.events = {};
 		this.listeners = [];
-		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
 		this.node = $(options.node || '<div>');
 
 		if (options.parent) {
 			this.parent = options.parent;
 		}
 
+		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
 		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
 		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
+
+		if (options.data) {
+			extendDeep(this.data, options.data);
+		}
 
 		if (options.ui) {
 			extendDeep(this.ui, options.ui);
@@ -95,29 +99,81 @@
 		/**
 		 * @param {string|Array} events
 		 * @param {Function} callback
-		 * @param {Object} [context]
+		 * @param {Object|boolean} [context]
 		 * @param {boolean} [once]
 		 * @returns {TemplateView}
 		 */
 		on: function (events, callback, context, once) {
 			events = splitEvents(events);
 
-			for (var i = 0, len = events.length; i < len; i++) {
-				var event = events[i],
-					callbacks = this.events[event];
+			if (typeof context === 'boolean') {
+				once = context;
+				context = null;
+			}
 
-				if (!event) continue;
+			var view = this;
+
+			events.forEach(function (event) {
+				if (!event) return;
+
+				var wrapper = callback,
+					not = false,
+					eq = false,
+					a = false,
+					prop;
+
+				if (event.charAt(0) === '!') {
+					not = true;
+					event = event.slice(1);
+				}
+
+				if (event.charAt(0) === '=') {
+					eq = true;
+					prop = event.slice(1);
+				}
+				else if (event.charAt(0) === '@') {
+					a = true;
+					prop = event.slice(1);
+					event = 'change:' + prop;
+				}
+
+				if (not || prop) {
+					wrapper = function (x) {
+						var arg = prop ? view.get(prop) : x;
+
+						if (not) {
+							arg = !arg;
+						}
+
+						var args = [arg];
+
+						if (arguments.length > 0) {
+							args = args.concat(slice(arguments, 0));
+						}
+
+						callback.apply(context || view, args);
+					};
+				}
+
+				if (eq || a) {
+					wrapper();
+				}
+
+				if (eq) return;
+
+				var callbacks = view.events[event];
 
 				if (!callbacks) {
-					callbacks = this.events[event] = [];
+					callbacks = view.events[event] = [];
 				}
 
 				callbacks.push({
 					once: once,
 					context: context,
-					callback: callback
+					callback: callback,
+					wrapper: wrapper
 				});
-			}
+			});
 
 			return this;
 		},
@@ -183,31 +239,20 @@
 
 				if (!listeners) continue;
 
-				var hasEmpty = false;
-
 				for (var i = 0, len = listeners.length; i < len; i++) {
 					var listener = listeners[i];
 
-					if (!listener) continue;
-
 					if (listener.once) {
-						hasEmpty = true;
-						listeners[i] = null;
+						listeners.splice(i, 1);
+						i--;
+						len--;
 					}
 
-					listener.callback.apply(listener.context || this, args);
+					listener.wrapper.apply(listener.context || this, args);
 				}
 
-				if (hasEmpty) {
-					listeners.forEach(function (listener, i) {
-						if (!listener) {
-							listeners.splice(i, 1);
-						}
-					});
-
-					if (listeners.length === 0) {
-						delete this.events[event];
-					}
+				if (listeners.length === 0) {
+					delete this.events[event];
 				}
 			}
 
@@ -451,7 +496,7 @@
 			if (selector.charAt(0) === '&') {
 				selector = selector.slice(1);
 			}
-			else {
+			else if (root) {
 				selector = ' ' + selector;
 			}
 
@@ -787,7 +832,7 @@
 	}
 
 	function slice(arr, start) {
-	    return Array.prototype.slice.call(arr, start);
+	    return arr.length > start ? Array.prototype.slice.call(arr, start) : [];
 	}
 
 	function emptyObject(obj) {

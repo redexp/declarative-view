@@ -1,19 +1,21 @@
 describe('template helper', function () {
     it('should work', function () {
-        var view = new TemplateView({
+		var view = new TemplateView({
 			node: '<div><div class="test"><div class="inner"></div></div><div class="test text"></div></div>',
 			template: {
-				'.test': {
-					template: {
-						'&.text': {
-							text: function () {
-							    return 'text';
-							}
-						},
+				'@root': {
+					'& .test': {
+						template: {
+							'&.text': {
+								text: function () {
+									return 'text';
+								}
+							},
 
-						'.inner': {
-							text: function () {
-							    return 'inner';
+							'.inner': {
+								text: function () {
+									return 'inner';
+								}
 							}
 						}
 					}

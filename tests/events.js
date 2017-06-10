@@ -52,6 +52,55 @@ describe('Events', function () {
 		expect(cb).have.callCount(7);
 	});
 
+	it('should handle =prop, @prop, !event', function () {
+		var view = new TemplateView({
+			data: {
+				prop: 'test'
+			}
+		});
+
+		var cb = sinon.spy();
+
+		view.on('=prop', cb);
+
+		expect(cb).to.have.callCount(1);
+		expect(cb).to.be.calledWith('test');
+		expect(view.events).to.be.empty;
+
+		view.on('!=prop', cb);
+
+		expect(cb).to.have.callCount(2);
+		expect(cb).to.be.calledWith(false);
+		expect(view.events).to.be.empty;
+
+		view.on('@prop', cb);
+		expect(cb).to.have.callCount(3);
+		expect(cb).to.be.calledWith('test');
+
+		view.set('prop', 'test2');
+		expect(cb).to.have.callCount(4);
+		expect(cb).to.be.calledWith('test2');
+
+		view.off();
+
+		view.on('!@prop', cb);
+		expect(cb).to.have.callCount(5);
+		expect(cb).to.be.calledWith(false);
+		view.set('prop', 0);
+		expect(cb).to.have.callCount(6);
+		expect(cb).to.be.calledWith(true);
+
+		view.off();
+
+		view.on('!event', cb);
+		view.trigger('event', 1, 2, 3);
+		expect(cb).to.have.callCount(7);
+		expect(cb).to.be.calledWith(false, 1, 2, 3);
+		view.trigger('event', 0);
+		expect(cb).to.have.callCount(8);
+		expect(cb).to.be.calledWith(true, 0);
+	});
+
     it('listenOn, stopListening, listenOnce', function () {
 		var view = new TemplateView();
 		var node = view.node;
