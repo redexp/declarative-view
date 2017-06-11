@@ -460,10 +460,11 @@
 
 		find: function (selector) {
 			if (selector.indexOf('@') > -1) {
-				var view = this;
+				var view = this,
+					key = 'uiSelector' + view.id;
 
 				selector = selector.replace(/@(\w+)/, function (x, name) {
-					return ensureUI(view, name).uiSelector;
+					return ensureUI(view, name)[key];
 				});
 			}
 
@@ -847,12 +848,14 @@
 		var selector = view.ui[name];
 
 		if (typeof selector === 'string') {
+			var key = 'uiSelector' + view.id;
+
 			selector = selector.replace(/@(\w+)/g, function (x, name) {
-				return ensureUI(view, name).uiSelector;
+				return ensureUI(view, name)[key];
 			});
 
 			view.ui[name] = selector ? view.node.find(selector) : view.node;
-			view.ui[name].uiSelector = selector;
+			view.ui[name][key] = selector;
 		}
 
 		if (_DEV_) {
