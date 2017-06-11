@@ -707,16 +707,18 @@
 
 			if (firstArgument) {
 				eachCallback = function (item, i) {
-					$(item)[method](firstArgument, valueCallback.call(view, item, i));
+					item[method](firstArgument, valueCallback.call(view, item, i));
 				};
 			}
 			else {
 				eachCallback = function (item, i) {
-					$(item)[method](valueCallback.call(view, item, i));
+					item[method](valueCallback.call(view, item, i));
 				};
 			}
 
-			node.forEach(eachCallback);
+			for (var i = 0, len = node.length; i < len; i++) {
+				eachCallback($(node[i]), i);
+			}
 		}
 		else if (firstArgument) {
 			node[method](firstArgument, value);
