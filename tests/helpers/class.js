@@ -12,13 +12,25 @@ describe('class helper', function () {
 			return true;
 		});
 
+		var functionIterator = sinon.spy(function (node, i) {
+			expect(node).to.be.instanceOf(TemplateView.$);
+
+			return i;
+		});
+
+		var eventIterator = sinon.spy(function () {
+			return functionIterator;
+		});
+
 		var view = new TemplateView({
+			node: '<div><div class="test"></div><div class="iterator"></div><div class="iterator"></div></div>',
+			
 			data: {
 				prop: true
 			},
 
 			template: {
-				'@root': {
+				'.test': {
 					'class': {
 						'test-event': 'event',
 						'test-eq-prop': '=prop',
@@ -29,43 +41,67 @@ describe('class helper', function () {
 						},
 						'test-function': testFunction
 					}
+				},
+				
+				'.iterator': {
+					toggleClass: {
+						'test-function-iterator': function () {
+							return functionIterator;
+						},
+						'test-event-iterator': {
+							'event-iterator': eventIterator
+						}
+					}
 				}
 			}
 		});
+		
+		var node = view.find('.test');
 
-		expect(view.node).not.to.have.class('test-event');
-		expect(view.node).to.have.class('test-eq-prop');
-		expect(view.node).to.have.class('test-a-prop');
-		expect(view.node).not.to.have.class('test-object');
-		expect(view.node).to.have.class('test-function');
+		expect(node).not.to.have.class('test-event');
+		expect(node).to.have.class('test-eq-prop');
+		expect(node).to.have.class('test-a-prop');
+		expect(node).not.to.have.class('test-object');
+		expect(node).to.have.class('test-function');
 
 		view.trigger('event', true);
-		expect(view.node).to.have.class('test-event');
+		expect(node).to.have.class('test-event');
 		view.trigger('event', false);
-		expect(view.node).not.to.have.class('test-event');
+		expect(node).not.to.have.class('test-event');
 
 		view.set('prop', false);
-		expect(view.node).to.have.class('test-eq-prop');
-		expect(view.node).not.to.have.class('test-a-prop');
+		expect(node).to.have.class('test-eq-prop');
+		expect(node).not.to.have.class('test-a-prop');
 		view.set('prop', true);
-		expect(view.node).to.have.class('test-eq-prop');
-		expect(view.node).to.have.class('test-a-prop');
+		expect(node).to.have.class('test-eq-prop');
+		expect(node).to.have.class('test-a-prop');
 
 		view.trigger('object-event-1', 0, 1);
-		expect(view.node).to.have.class('test-object');
+		expect(node).to.have.class('test-object');
 		expect(objectEvent1).to.be.calledWith(0, 1);
 		view.trigger('object-event-1', 1, -1);
-		expect(view.node).not.to.have.class('test-object');
+		expect(node).not.to.have.class('test-object');
 
 		view.trigger('object-event-2', -1, -2);
-		expect(view.node).to.have.class('test-object');
+		expect(node).to.have.class('test-object');
 		view.trigger('object-event-2', 1, 1);
-		expect(view.node).not.to.have.class('test-object');
+		expect(node).not.to.have.class('test-object');
 
-		expect(view.node).not.to.have.class('test-event');
-		expect(view.node).to.have.class('test-eq-prop');
-		expect(view.node).to.have.class('test-a-prop');
-		expect(view.node).not.to.have.class('test-object');
-		expect(view.node).to.have.class('test-function');
+		expect(node).not.to.have.class('test-event');
+		expect(node).to.have.class('test-eq-prop');
+		expect(node).to.have.class('test-a-prop');
+		expect(node).not.to.have.class('test-object');
+		expect(node).to.have.class('test-function');
+
+		var iterator = view.find('.iterator');
+		expect(functionIterator).to.have.callCount(2);
+		expect(iterator.eq(0)).not.to.have.class('test-function-iterator');
+		expect(iterator.eq(1)).to.have.class('test-function-iterator');
+
+		iterator.addClass('test-event-iterator');
+		view.trigger('event-iterator');
+		expect(functionIterator).to.have.callCount(4);
+		expect(iterator.eq(0)).not.to.have.class('test-event-iterator');
+		expect(iterator.eq(1)).to.have.class('test-function-iterator');
 	});
 });
