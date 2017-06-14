@@ -483,7 +483,8 @@
 		html: htmlHelper,
 		text: textHelper,
 		on: onHelper,
-		once: onceHelper
+		once: onceHelper,
+		connect: connectHelper
 	};
 
 	//region ====================== Helpers =======================================
@@ -643,6 +644,36 @@
 
 	function onceHelper(view, selector, events) {
 		onHelper(view, selector, events, true);
+	}
+
+	function connectHelper(view, selector, options) {
+		var node = view.find(selector);
+
+		for (var nodeProp in options) {
+			if (!options.hasOwnProperty(nodeProp)) continue;
+
+			connectHelperBind(nodeProp, options[nodeProp]);
+		}
+
+		function connectHelperBind(nodeProp, viewProp) {
+			var event = 'change';
+
+			if (nodeProp.indexOf('|') > -1) {
+				nodeProp = nodeProp.split('|');
+				event = nodeProp[1];
+				nodeProp = nodeProp[0];
+			}
+
+			view.listenOn(node, event, function () {
+				view.set(viewProp, node.prop(nodeProp));
+			});
+
+			view.on('@' + viewProp, function (value) {
+				if (value === node.prop(nodeProp)) return;
+
+				node.prop(nodeProp, value);
+			});
+		}
 	}
 
 	//endregion
