@@ -600,39 +600,44 @@
 				for (var target in options) {
 					if (!options.hasOwnProperty(target)) continue;
 
-					view.listenOn(node, event, target, options[target], once);
+					var cb = options[target];
+
+					if (typeof cb === 'string') {
+						cb = stringToCallback(cb);
+					}
+
+					view.listenOn(node, event, target, cb, once);
 				}
 				break;
 
 			case 'string':
-				(function (method) {
-					var prevent = method.charAt(0) === '!';
-
-					if (prevent) {
-						method = method.slice(1);
-					}
-
-					if (_DEV_) {
-						if (method && typeof view[method] !== 'function') {
-							console.warn('Undefined method "'+ method +'" in view ' + view.constructor.name);
-						}
-					}
-
-					var cb = function (e) {
-						if (prevent) {
-							e.preventDefault();
-						}
-
-						if (!method) return;
-
-						view[method].apply(view, arguments);
-					};
-
-					view.listenOn(node, event, cb, once);
-
-				})(options);
+				view.listenOn(node, event, stringToCallback(options), once);
 				break;
 			}
+		}
+
+		function stringToCallback(method) {
+			var prevent = method.charAt(0) === '!';
+
+			if (prevent) {
+				method = method.slice(1);
+			}
+
+			if (_DEV_) {
+				if (method && typeof view[method] !== 'function') {
+					console.warn('Undefined method "'+ method +'" in view ' + view.constructor.name);
+				}
+			}
+
+			return function (e) {
+				if (prevent) {
+					e.preventDefault();
+				}
+
+				if (!method) return;
+
+				view[method].apply(view, arguments);
+			};
 		}
 	}
 
