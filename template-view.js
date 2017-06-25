@@ -758,11 +758,10 @@
 
 	function eachHelper(view, selector, options) {
 		var node = view.find(selector),
-			list = view.model(options.prop);
+			list = view.model(options.prop),
+			tplSelector = options.node || '> *';
 
-		selector = options.node || '> *';
-
-		var tpl = selector.charAt(0) === '<' ? $(selector) : node.find(selector);
+		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? node.find(tplSelector) : $(tplSelector);
 		tpl.detach();
 
 		list.forEach(function (item) {

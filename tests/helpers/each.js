@@ -85,7 +85,7 @@ describe('each helper', function () {
 		expect(view.node.children().eq(2)).to.have.text('value3');
 	});
 
-	it('node option', function () {
+	it('node option as selector', function () {
 		var view = new TemplateView({
 			node: '<ul><li class="first"></li><li class="test"></li><li class="last"></li></ul>',
 			data: {
@@ -108,7 +108,29 @@ describe('each helper', function () {
 		expect(view.node.children().eq(3)).to.have.class('test');
 	});
 
-	it('view as class', function () {
+	it('node option as html', function () {
+		var view = new TemplateView({
+			node: '<ul><li class="first"></li></ul>',
+			data: {
+				test: [1, 2]
+			},
+			template: {
+				'@root': {
+					each: {
+						prop: 'test',
+						node: '<li class="test"></li>'
+					}
+				}
+			}
+		});
+
+		expect(view.node.children().length).to.equal(3);
+		expect(view.node.children().eq(0)).to.have.class('first');
+		expect(view.node.children().eq(1)).to.have.class('test');
+		expect(view.node.children().eq(2)).to.have.class('test');
+	});
+
+	it('view option as class', function () {
 		var Test = TemplateView.extend({
 			template: {
 				'@root': {
@@ -137,7 +159,7 @@ describe('each helper', function () {
 		expect(view.node.children().eq(1)).to.have.text('2');
 	});
 
-	it('view as function which returns class', function () {
+	it('view option as function which returns class', function () {
 		var Test = TemplateView.extend({
 			template: {
 				'@root': {
@@ -184,7 +206,7 @@ describe('each helper', function () {
 		expect(cb.getCall(1).args[1]).to.be.instanceOf(TemplateView.$);
 	});
 
-	it('view as function which returns view', function () {
+	it('view option as function which returns view', function () {
 		var cb = sinon.spy(function (item, node) {
 			return new TemplateView({
 				node: node,
