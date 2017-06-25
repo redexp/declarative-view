@@ -128,6 +128,31 @@ describe('model', function () {
 		expect(removeAllUsers.getCall(2)).to.be.calledWith({name: 'add2'}, 2);
 		expect(removeAllUsers.getCall(3)).to.be.calledWith({name: 'add1'}, 1);
 		expect(removeAllUsers.getCall(4)).to.be.calledWith({name: 'test2'}, 0);
+
+		expect(view.wrappers.sources.length).to.equal(2);
+		expect(view.wrappers.targets.length).to.equal(2);
+		expect(view.wrappers.sources[0]).to.equal(view.data.test);
+		expect(view.wrappers.sources[1]).to.equal(view.data.test.users);
+
+		view.model('test').model('users').add([{prop: {name: 'value1'}}, {prop: {name: 'value2'}}, {prop: {name: 'value3'}}]);
+		view.model('test').model('users').model(0).model('prop');
+		view.model('test').model('users').model(1).model('prop');
+		view.model('test').model('users').model(2).model('prop');
+		expect(view.wrappers.sources.length).to.equal(8);
+		expect(view.wrappers.targets.length).to.equal(8);
+		expect(view.model('test').model('users').model(0).model('prop').get('name')).to.equal('value1');
+		expect(view.data.test.users[0].prop.name).to.equal('value1');
+		view.model('test').model('users').removeAt(0);
+		expect(view.model('test').model('users').model(0).model('prop').get('name')).to.equal('value2');
+		expect(view.data.test.users[0].prop.name).to.equal('value2');
+		expect(view.wrappers.sources.length).to.equal(6);
+		expect(view.wrappers.targets.length).to.equal(6);
+		expect(view.wrappers.sources[0]).to.equal(view.data.test);
+		expect(view.wrappers.sources[1]).to.equal(view.data.test.users);
+		expect(view.wrappers.sources[2]).to.equal(view.data.test.users[0]);
+		expect(view.wrappers.sources[3]).to.equal(view.data.test.users[0].prop);
+		expect(view.wrappers.sources[4]).to.equal(view.data.test.users[1]);
+		expect(view.wrappers.sources[5]).to.equal(view.data.test.users[1].prop);
 	});
 
 	it('remove model', function () {
@@ -145,13 +170,26 @@ describe('model', function () {
 
 		view.model('test').model('prop').model('user');
 
-		expect(view.wrappers).to.have.all.keys('test', 'test.prop', 'test.prop.user');
+		expect(view.wrappers.sources.length).to.equal(3);
+		expect(view.wrappers.targets.length).to.equal(3);
+		expect(view.wrappers.sources[0]).to.equal(view.data.test);
+		expect(view.wrappers.sources[1]).to.equal(view.data.test.prop);
+		expect(view.wrappers.sources[2]).to.equal(view.data.test.prop.user);
 
 		view.model('test').set('prop', {user: 'value'});
 
-		expect(view.wrappers).to.have.all.keys('test');
+		expect(view.wrappers.sources.length).to.equal(1);
+		expect(view.wrappers.targets.length).to.equal(1);
+		expect(view.wrappers.sources[0]).to.equal(view.data.test);
 		expect(view.data).to.eql({test: {prop: {user: 'value'}}});
 		expect(view.model('test').model('prop').get('user')).to.equal('value');
-		expect(view.wrappers).to.have.all.keys('test', 'test.prop');
+		expect(view.wrappers.sources.length).to.equal(2);
+		expect(view.wrappers.targets.length).to.equal(2);
+		expect(view.wrappers.sources[0]).to.eql(view.data.test);
+		expect(view.wrappers.sources[1]).to.eql(view.data.test.prop);
+
+		view.set('test', {});
+		expect(view.wrappers.sources.length).to.equal(0);
+		expect(view.wrappers.targets.length).to.equal(0);
 	});
 });

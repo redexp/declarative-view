@@ -21,7 +21,7 @@
 		this.id = TemplateView.nextId();
 		this.events = {};
 		this.listeners = [];
-		this.wrappers = {};
+		this.wrappers = {sources: [], targets: []};
 		this.node = $(options.node || this.node || '<div>');
 
 		if (options.parent) {
@@ -108,28 +108,38 @@
 		},
 
 		/**
-		 * @param {string} prop
+		 * @param {string} [prop]
 		 * @returns {*}
 		 */
 		get: function (prop) {
+			if (arguments.length === 0) {
+				return this.data;
+			}
+
 			return this.data[prop];
 		},
 
 		/**
-		 * @param {string} name
+		 * @param {string} prop
 		 * @param {*} value
 		 * @returns {TemplateView}
 		 */
-		set: function (name, value) {
-			if (this.get(name) === value) return this;
+		set: function (prop, value) {
+			var oldValue = this.get(prop);
 
-			var oldValue = this.data[name];
+			if (oldValue === value) return this;
 
-			this.data[name] = value;
+			var sourceIndex = this.wrappers.sources.indexOf(oldValue);
 
-			this.trigger('set/' + name, value, oldValue);
-			this.trigger('set/*', [], name, value, oldValue);
-			this.trigger('set', name, value, oldValue);
+			if (sourceIndex !== -1) {
+				this.wrappers.targets[sourceIndex].clear();
+			}
+
+			this.data[prop] = value;
+
+			this.trigger('set/' + prop, value, oldValue);
+			this.trigger('set/*', [], prop, value, oldValue);
+			this.trigger('set', prop, value, oldValue);
 
 			return this;
 		},
@@ -145,11 +155,15 @@
 				return model;
 			}
 
-			if (!this.wrappers[prop]) {
-				this.wrappers[prop] = this.wrapper(this.get(prop), [prop]);
+			var source = this.get(prop),
+				index = this.wrappers.sources.indexOf(source);
+
+			if (index === -1) {
+				index = this.wrappers.sources.push(source) - 1;
+				this.wrappers.targets.push(this.wrapper(source, [prop]));
 			}
 
-			return this.wrappers[prop];
+			return this.wrappers.targets[index];
 		},
 
 		wrapper: function (item, path) {
@@ -907,22 +921,27 @@
 
 	extend(ObjectWrapper.prototype, {
 		get: function (prop) {
+			if (arguments.length === 0) {
+				return this.context;
+			}
+
 			return this.context[prop];
 		},
 
 		set: function (prop, value) {
-			if (this.context[prop] === value) return this;
+			var oldValue = this.get(prop);
 
-			var key = this.key + '.' + prop;
+			if (oldValue === value) return this;
 
-			if (this.view.wrappers[key]) {
-				this.view.wrappers[key].clear();
+			var sourceIndex = this.view.wrappers.sources.indexOf(oldValue);
+
+			if (sourceIndex !== -1) {
+				this.view.wrappers.targets[sourceIndex].clear();
 			}
 
-			var oldValue = this.context[prop];
 			this.context[prop] = value;
 
-			this.trigger('set/' + key, value, oldValue);
+			this.trigger('set/' + this.key + '.' + prop, value, oldValue);
 			this.trigger('set/' + this.key + '.*', prop, value, oldValue);
 			this.trigger('set/*', this.path, prop, value, oldValue);
 			return this;
@@ -933,27 +952,34 @@
 		},
 
 		model: function (prop) {
-			var key = this.key + '.' + prop;
+			var source = this.get(prop),
+				index = this.view.wrappers.sources.indexOf(source);
 
-			if (!this.view.wrappers[key]) {
-				this.view.wrappers[key] = this.view.wrapper(this.get(prop), this.path.concat(prop));
+			if (index === -1) {
+				index = this.view.wrappers.sources.push(source) - 1;
+				this.view.wrappers.targets.push(this.view.wrapper(source, this.path.concat(prop)));
 			}
 
-			return this.view.wrappers[key];
+			return this.view.wrappers.targets[index];
 		},
 
 		clear: function () {
-			if (this.view.wrappers[this.key] === this) {
-				delete this.view.wrappers[this.key];
+			var index = this.view.wrappers.sources.indexOf(this.context);
+
+			if (index !== -1) {
+				this.view.wrappers.sources.splice(index, 1);
+				this.view.wrappers.targets.splice(index, 1);
 			}
 
-			for (var prop in this.context) {
-				if (!this.context.hasOwnProperty(prop)) continue;
+			var props = this.get();
 
-				var wrapper = this.view.wrappers[this.key + '.' + prop];
+			for (var prop in props) {
+				if (!props.hasOwnProperty(prop)) continue;
 
-				if (wrapper) {
-					wrapper.clear();
+				index = this.view.wrappers.sources.indexOf(props[prop]);
+
+				if (index !== -1) {
+					this.view.wrappers.targets[index].clear();
 				}
 			}
 
@@ -1043,8 +1069,14 @@
 			var arr = this.context;
 
 			for (var i = 0, len = indexes.length; i < len; i++) {
-				var index = indexes[i];
-				var item = arr[index];
+				var index = indexes[i],
+					item = arr[index],
+					sourceIndex = this.view.wrappers.sources.indexOf(item);
+
+				if (sourceIndex !== -1) {
+					this.view.wrappers.targets[sourceIndex].clear();
+				}
+
 				arr.splice(index, 1);
 				this.trigger('remove/' + this.key, item, index);
 				this.trigger('remove/*', this.path, item, index);
