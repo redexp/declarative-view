@@ -1,10 +1,10 @@
 ;(function (factory) {
 	if (typeof define === 'function' && define.amd) {
-		define([], factory);
+		define(['jquery'], factory);
 	} else {
-		window.TemplateView = factory();
+		window.TemplateView = factory(window.jQuery);
 	}
-})(function () {
+})(function ($) {
 
 	/**
 	 * _DEV_ will be false in min file and
@@ -12,8 +12,6 @@
 	 * @type {boolean}
 	 */
 	var _DEV_ = true;
-
-	var $ = window.jQuery;
 
 	//region ====================== EventsHandler =================================
 
@@ -429,10 +427,6 @@
 		TemplateView.helpers.template(this, '', this.template);
 	}
 
-	EventsHandler.extend({
-		constructor: TemplateView
-	});
-
 	extend(TemplateView, {
 		$: $,
 
@@ -450,7 +444,7 @@
 		}
 	});
 
-	extend(TemplateView.prototype, {
+	extendClass(TemplateView, EventsHandler, {
 		ui: {
 			root: ''
 		},
@@ -932,11 +926,7 @@
 		this.context = context;
 	}
 
-	EventsHandler.extend({
-		constructor: ObjectWrapper
-	});
-
-	extend(ObjectWrapper.prototype, {
+	extendClass(ObjectWrapper, EventsHandler, {
 		get: function (prop) {
 			if (arguments.length === 0) {
 				return this.context;
@@ -1007,9 +997,7 @@
 		ObjectWrapper.apply(this, arguments);
 	}
 
-	ObjectWrapper.extend({
-		constructor: ArrayWrapper,
-
+	extendClass(ArrayWrapper, ObjectWrapper, {
 		indexOf: function (item) {
 			return this.context.indexOf(item);
 		},
@@ -1123,24 +1111,26 @@
 
 	//region ====================== Utils =========================================
 
-	function extendClass(properties) {
-		properties = properties || {};
+	function extendClass(Child, Parent, protoProps) {
+		if (typeof this === 'function') {
+			protoProps = arguments[0] || {};
 
-		var Parent = this;
-		var Child = properties.hasOwnProperty('constructor') ? properties.constructor : function () { Parent.apply(this, arguments); };
+			Parent = this;
+			Child = protoProps.hasOwnProperty('constructor') ? protoProps.constructor : function () { Parent.apply(this, arguments); };
+		}
 
 		if (Object.create) {
 			Child.prototype = Object.create(Parent.prototype);
 		}
 		else {
 			var Extend = function () {};
-			Extend.prototype = properties;
+			Extend.prototype = protoProps;
 			Child.prototype = new Extend();
 		}
 
 		Child.prototype.constructor = Child;
 
-		extend(Child.prototype, properties);
+		extend(Child.prototype, protoProps);
 
 		Child.extend = Parent.extend;
 		Child.parent = Parent;
