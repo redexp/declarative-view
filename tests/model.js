@@ -3,7 +3,7 @@ describe('model', function () {
 		var view = new TemplateView({
 			data: {
 				test: {
-					prop: {
+					user: {
 						name: 'value'
 					}
 				},
@@ -15,50 +15,33 @@ describe('model', function () {
 			}
 		});
 
-		expect(view.model('test').model('prop').get('name')).to.equal('value');
+		expect(view.model('test').model('user').get('name')).to.equal('value');
 		expect(view.model('users').model(0).get('name')).to.equal('test');
 
-		var setPropName = sinon.spy();
-		var setPropAll = sinon.spy();
-		var setAll = sinon.spy();
-		view.on('set/test.prop.name', setPropName);
-		view.on('set/test.prop.*', setPropAll);
-		view.on('set/*', setAll);
-		view.model('test').model('prop').set('name', 'test');
-		expect(setPropName).to.have.callCount(1);
-		expect(setPropName).to.be.calledOn(view);
-		expect(setPropAll).to.have.callCount(1);
-		expect(setPropAll).to.be.calledWith('name', 'test', 'value');
-		expect(setAll).to.have.callCount(1);
-		expect(setAll).to.be.calledOn(view);
-		expect(setAll).to.be.calledWith(['test', 'prop'], 'name', 'test', 'value');
+		var user = view.model('test').model('user');
+		var setName = sinon.spy();
+		var set = sinon.spy();
+		user.on('set/name', setName);
+		user.on('set/*', set);
+		user.set('name', 'value2');
+		expect(view.data.test.user.name).to.equal('value2');
+		expect(setName).to.have.callCount(1);
+		expect(setName).to.be.calledOn(user);
+		expect(setName).to.be.calledWith('value2', 'value');
+		expect(set).to.have.callCount(1);
+		expect(set).to.be.calledOn(user);
+		expect(set).to.be.calledWith('name', 'value2', 'value');
 
-		var setProp = sinon.spy();
-		view.on('set/test.prop', setProp);
-		view.model('test').set('prop', {name: 'asd'});
-		expect(setPropName).to.have.callCount(1);
-		expect(setProp).to.have.callCount(1);
-		expect(setProp).to.be.calledWith({name: 'asd'}, {name: 'test'});
-		expect(setAll).to.have.callCount(2);
-		expect(setAll).to.be.calledWith(['test'], 'prop', {name: 'asd'}, {name: 'test'});
-		expect(view.model('test').model('prop').get('name')).to.equal('asd');
-
-		view.model('test').model('prop').set('name', 'qwe');
-		expect(setPropName).to.have.callCount(2);
-		expect(setPropName).to.be.calledWith('qwe', 'asd');
-		expect(setProp).to.have.callCount(1);
-		expect(setAll).to.have.callCount(3);
-		expect(setAll).to.be.calledWith(['test', 'prop'], 'name', 'qwe', 'asd');
-
-		var setUsersName = sinon.spy();
-		view.on('set/users.0.name', setUsersName);
-		view.model('users').model(0).set('name', 'value');
-		expect(setUsersName).to.have.callCount(1);
-		expect(setPropName).to.have.callCount(2);
-		expect(setProp).to.have.callCount(1);
-		expect(setAll).to.have.callCount(4);
-		expect(setUsersName).to.be.calledWith('value', 'test');
-		expect(setAll).to.be.calledWith(['users', 0], 'name', 'value', 'test');
+		expect(view.wrappers.sources.length).to.equal(4);
+		expect(view.wrappers.targets.length).to.equal(4);
+		view.model('test').set('user', {test: 'value'});
+		expect(view.wrappers.sources.length).to.equal(3);
+		view.set('users', []);
+		expect(view.wrappers.sources.length).to.equal(1);
+		view.set('test', {});
+		expect(view.wrappers.sources.length).to.equal(0);
+		expect(view.wrappers.targets.length).to.equal(0);
+		expect(view.data).to.eql({test: {}, users: []});
 	});
 
 	it('array model', function () {
@@ -67,92 +50,44 @@ describe('model', function () {
 				test: {
 					users: [
 						{
-							name: 'value'
+							name: 'value1'
 						}
 					]
 				}
 			}
 		});
 
-		var addUsers = sinon.spy();
-		var addAll = sinon.spy();
-		view.on('add/test.users', addUsers);
-		view.on('add/*', addAll);
-		view.model('test').model('users').add({name: 'value2'});
-		expect(addUsers).to.have.callCount(1);
-		expect(addUsers).to.be.calledWith({name: 'value2'}, 1);
-		view.model('test').model('users').add({name: 'value3'});
-		expect(addUsers).to.be.calledWith({name: 'value3'}, 2);
-		view.model('test').model('users').add({name: 'value4'}, 0);
-		expect(addUsers).to.be.calledWith({name: 'value4'}, 0);
-		expect(view.model('test').model('users').model(0).get('name')).to.be.equal('value4');
-		expect(view.model('test').model('users').length()).to.be.equal(4);
-		expect(addAll).to.have.callCount(3);
-		expect(addAll).to.be.calledWith(['test', 'users'], {name: 'value4'}, 0);
+		var users = view.model(['test', 'users']);
+		var add = sinon.spy();
+		var remove = sinon.spy();
+		users.on('add', add);
+		users.on('remove', remove);
+		users.add({name: 'value2'});
+		expect(add).to.have.callCount(1);
+		expect(add).to.be.calledWith({name: 'value2'}, 1);
+		users.add({name: 'value3'}, 0);
+		expect(add).to.be.calledWith({name: 'value3'}, 0);
+		users.add([{name: 'value4'}, {name: 'value5'}]);
+		expect(add).to.be.calledWith({name: 'value5'}, 4);
+		users.add([{name: 'value6'}, {name: 'value7'}], 1);
+		expect(add).to.be.calledWith({name: 'value7'}, 2);
+		expect(view.data.test.users).to.eql([{name: 'value3'}, {name: 'value6'}, {name: 'value7'}, {name: 'value1'}, {name: 'value2'}, {name: 'value4'}, {name: 'value5'}]);
+		expect(add).to.have.callCount(6);
+		expect(add).to.be.always.calledOn(users);
 
-		var removeUsers = sinon.spy();
-		var removeAll = sinon.spy();
-		view.on('remove/test.users', removeUsers);
-		view.on('remove/*', removeAll);
-		view.model('test').model('users').remove(view.data.test.users[3]);
-		expect(removeUsers).to.be.calledWith({name: 'value3'}, 3);
-		expect(removeAll).to.be.calledWith(['test', 'users'], {name: 'value3'}, 3);
-		view.model('test').model('users').removeAt(0);
-		expect(removeUsers).to.be.calledWith({name: 'value4'}, 0);
-		expect(removeAll).to.be.calledWith(['test', 'users'], {name: 'value4'}, 0);
-
-		view.model('test').model('users').replace(view.data.test.users[1], {name: 'test'});
-		expect(removeUsers).to.be.calledWith({name: 'value2'}, 1);
-		expect(removeAll).to.be.calledWith(['test', 'users'], {name: 'value2'}, 1);
-		expect(addUsers).to.be.calledWith({name: 'test'}, 1);
-		expect(addAll).to.be.calledWith(['test', 'users'], {name: 'test'}, 1);
-		view.model('test').model('users').replaceAt(0, {name: 'test2'});
-		expect(removeUsers).to.be.calledWith({name: 'value'}, 0);
-		expect(removeAll).to.be.calledWith(['test', 'users'], {name: 'value'}, 0);
-		expect(addUsers).to.be.calledWith({name: 'test2'}, 0);
-		expect(addAll).to.be.calledWith(['test', 'users'], {name: 'test2'}, 0);
-
-		expect(view.data.test.users).to.eql([{name: 'test2'}, {name: 'test'}]);
-
-		view.model('test').model('users').add([{name: 'add1'}, {name: 'add2'}, {name: 'add3'}], 1);
-		expect(addUsers).to.be.calledWith({name: 'add3'}, 3);
-		expect(view.data.test.users).to.eql([{name: 'test2'}, {name: 'add1'}, {name: 'add2'}, {name: 'add3'}, {name: 'test'}]);
-
-		var removeAllUsers = sinon.spy();
-		view.on('remove/test.users', removeAllUsers);
-		view.model('test').model('users').removeAll();
-		expect(view.data.test.users.length).to.equal(0);
-		expect(removeAllUsers).to.have.callCount(5);
-		expect(removeAllUsers.getCall(0)).to.be.calledWith({name: 'test'}, 4);
-		expect(removeAllUsers.getCall(1)).to.be.calledWith({name: 'add3'}, 3);
-		expect(removeAllUsers.getCall(2)).to.be.calledWith({name: 'add2'}, 2);
-		expect(removeAllUsers.getCall(3)).to.be.calledWith({name: 'add1'}, 1);
-		expect(removeAllUsers.getCall(4)).to.be.calledWith({name: 'test2'}, 0);
-
-		expect(view.wrappers.sources.length).to.equal(2);
-		expect(view.wrappers.targets.length).to.equal(2);
-		expect(view.wrappers.sources[0]).to.equal(view.data.test);
-		expect(view.wrappers.sources[1]).to.equal(view.data.test.users);
-
-		view.model('test').model('users').add([{prop: {name: 'value1'}}, {prop: {name: 'value2'}}, {prop: {name: 'value3'}}]);
-		view.model('test').model('users').model(0).model('prop');
-		view.model('test').model('users').model(1).model('prop');
-		view.model('test').model('users').model(2).model('prop');
-		expect(view.wrappers.sources.length).to.equal(8);
-		expect(view.wrappers.targets.length).to.equal(8);
-		expect(view.model('test').model('users').model(0).model('prop').get('name')).to.equal('value1');
-		expect(view.data.test.users[0].prop.name).to.equal('value1');
-		view.model('test').model('users').removeAt(0);
-		expect(view.model('test').model('users').model(0).model('prop').get('name')).to.equal('value2');
-		expect(view.data.test.users[0].prop.name).to.equal('value2');
-		expect(view.wrappers.sources.length).to.equal(6);
-		expect(view.wrappers.targets.length).to.equal(6);
-		expect(view.wrappers.sources[0]).to.equal(view.data.test);
-		expect(view.wrappers.sources[1]).to.equal(view.data.test.users);
-		expect(view.wrappers.sources[2]).to.equal(view.data.test.users[0]);
-		expect(view.wrappers.sources[3]).to.equal(view.data.test.users[0].prop);
-		expect(view.wrappers.sources[4]).to.equal(view.data.test.users[1]);
-		expect(view.wrappers.sources[5]).to.equal(view.data.test.users[1].prop);
+		users.remove(view.data.test.users[1]);
+		expect(remove).to.have.callCount(1);
+		expect(remove).to.be.calledWith({name: 'value6'}, 1);
+		users.remove([view.data.test.users[1], view.data.test.users[2]]);
+		expect(remove).to.be.calledWith({name: 'value1'}, 1);
+		users.removeAt(0);
+		expect(remove).to.be.calledWith({name: 'value3'}, 0);
+		users.removeAt([1, 2]);
+		expect(remove).to.be.calledWith({name: 'value4'}, 1);
+		users.removeAll();
+		expect(remove).to.be.calledWith({name: 'value2'}, 0);
+		expect(remove).to.have.callCount(7);
+		expect(remove).to.be.always.calledOn(users);
 	});
 
 	it('remove model', function () {

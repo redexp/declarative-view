@@ -15,163 +15,18 @@
 
 	var $ = window.jQuery;
 
-	function TemplateView(options) {
-		options = options || {};
+	//region ====================== EventsHandler =================================
 
-		this.id = TemplateView.nextId();
+	function EventsHandler() {
 		this.events = {};
 		this.listeners = [];
-		this.wrappers = {sources: [], targets: []};
-		this.node = $(options.node || this.node || '<div>');
-
-		if (options.parent) {
-			this.parent = options.parent;
-		}
-
-		if (options.context) {
-			this.context = options.context;
-		}
-
-		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
-		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
-		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
-
-		if (options.data) {
-			extend(this.data, options.data);
-		}
-
-		if (options.ui) {
-			extend(this.ui, options.ui);
-		}
-
-		if (options.template) {
-			extendDeep(this.template, options.template);
-		}
-
-		for (var name in this.ui) {
-			if (!this.ui.hasOwnProperty(name)) continue;
-
-			ensureUI(this, name);
-		}
-
-		TemplateView.helpers.template(this, '', this.template);
 	}
 
-	extend(TemplateView, {
-		$: $,
-
-		ObjectWrapper: ObjectWrapper,
-
-		ArrayWrapper: ArrayWrapper,
-
-		currentId: 0,
-
-		/**
-		 * @returns {Number}
-		 */
-		nextId: function () {
-			return ++this.currentId;
-		},
-
-		/**
-		 * @param {Object} properties
-		 * @returns {TemplateView}
-		 */
-		extend: function (properties) {
-			properties = properties || {};
-
-			var Parent = this;
-			var Child = properties.hasOwnProperty('constructor') ? properties.constructor : function (ops) { Parent.call(this, ops); };
-
-			if (Object.create) {
-				Child.prototype = Object.create(Parent.prototype);
-			}
-			else {
-				var Extend = function () {};
-				Extend.prototype = properties;
-				Child.prototype = new Extend();
-			}
-
-			Child.prototype.constructor = Child;
-
-			extend(Child.prototype, properties);
-
-			Child.extend = Parent.extend;
-
-			return Child;
-		}
+	extend(EventsHandler, {
+		extend: extendClass
 	});
 
-	extend(TemplateView.prototype, {
-		ui: {
-			root: ''
-		},
-
-		/**
-		 * @param {string} [prop]
-		 * @returns {*}
-		 */
-		get: function (prop) {
-			if (arguments.length === 0) {
-				return this.data;
-			}
-
-			return this.data[prop];
-		},
-
-		/**
-		 * @param {string} prop
-		 * @param {*} value
-		 * @returns {TemplateView}
-		 */
-		set: function (prop, value) {
-			var oldValue = this.get(prop);
-
-			if (oldValue === value) return this;
-
-			var sourceIndex = this.wrappers.sources.indexOf(oldValue);
-
-			if (sourceIndex !== -1) {
-				this.wrappers.targets[sourceIndex].clear();
-			}
-
-			this.data[prop] = value;
-
-			this.trigger('set/' + prop, value, oldValue);
-			this.trigger('set/*', [], prop, value, oldValue);
-			this.trigger('set', prop, value, oldValue);
-
-			return this;
-		},
-
-		model: function (prop) {
-			if (prop instanceof Array) {
-				var model = this;
-
-				for (var i = 0, len = prop.length; i < len; i++) {
-					model = model.model(prop[i]);
-				}
-
-				return model;
-			}
-
-			var source = this.get(prop),
-				index = this.wrappers.sources.indexOf(source);
-
-			if (index === -1) {
-				index = this.wrappers.sources.push(source) - 1;
-				this.wrappers.targets.push(this.wrapper(source, [prop]));
-			}
-
-			return this.wrappers.targets[index];
-		},
-
-		wrapper: function (item, path) {
-			var Wrapper = item instanceof Array ? ArrayWrapper : ObjectWrapper;
-
-			return new Wrapper(this, path, item);
-		},
-
+	extend(EventsHandler.prototype, {
 		/**
 		 * @param {string|Array} events
 		 * @param {Function} callback
@@ -261,7 +116,7 @@
 		 * @returns {TemplateView}
 		 */
 		once: function (events, callback, context) {
-		    return this.on(events, callback, context, true);
+			return this.on(events, callback, context, true);
 		},
 
 		/**
@@ -285,7 +140,7 @@
 
 				if (callback) {
 					spliceBy(callbacks, findItem(callbacks, function (params) {
-					    return params.callback === callback;
+						return params.callback === callback;
 					}));
 
 					if (callbacks.length === 0) {
@@ -348,7 +203,7 @@
 				once = params.once;
 
 			var listener = findItem(this.listeners, function (listener) {
-			    return listener.target === target;
+				return listener.target === target;
 			});
 
 			if (!listener) {
@@ -448,13 +303,13 @@
 					if (!callbacks) return;
 
 					callbacks.forEach(function (cb) {
-					    if (cb.origin !== callback) return;
+						if (cb.origin !== callback) return;
 
 						listener.off(target, event, cb.wrapper);
 
 						spliceBy(callbacks, cb);
 					});
-					
+
 					if (callbacks.length === 0) {
 						delete listener.events[event];
 					}
@@ -495,7 +350,7 @@
 				on: function (target, events, callback) {
 					args[0] = events;
 					args[args.length - 1] = callback;
-				    target.on.apply(target, args);
+					target.on.apply(target, args);
 				},
 				off: function (target, events, callback) {
 					var args;
@@ -510,7 +365,7 @@
 						args = [];
 					}
 
-				    target.off.apply(target, args);
+					target.off.apply(target, args);
 				}
 			});
 		},
@@ -527,6 +382,142 @@
 			args.push(true);
 
 			return this.listenOn.apply(this, args);
+		}
+	});
+
+	//endregion
+
+	function TemplateView(options) {
+		TemplateView.parent.apply(this, arguments);
+
+		options = options || {};
+
+		this.id = TemplateView.nextId();
+		this.wrappers = {sources: [], targets: []};
+		this.node = $(options.node || this.node || '<div>');
+
+		if (options.parent) {
+			this.parent = options.parent;
+		}
+
+		if (options.context) {
+			this.context = options.context;
+		}
+
+		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
+		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
+		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
+
+		if (options.data) {
+			extend(this.data, options.data);
+		}
+
+		if (options.ui) {
+			extend(this.ui, options.ui);
+		}
+
+		if (options.template) {
+			extendDeep(this.template, options.template);
+		}
+
+		for (var name in this.ui) {
+			if (!this.ui.hasOwnProperty(name)) continue;
+
+			ensureUI(this, name);
+		}
+
+		TemplateView.helpers.template(this, '', this.template);
+	}
+
+	EventsHandler.extend({
+		constructor: TemplateView
+	});
+
+	extend(TemplateView, {
+		$: $,
+
+		ObjectWrapper: ObjectWrapper,
+
+		ArrayWrapper: ArrayWrapper,
+
+		currentId: 0,
+
+		/**
+		 * @returns {Number}
+		 */
+		nextId: function () {
+			return ++this.currentId;
+		}
+	});
+
+	extend(TemplateView.prototype, {
+		ui: {
+			root: ''
+		},
+
+		/**
+		 * @param {string} [prop]
+		 * @returns {*}
+		 */
+		get: function (prop) {
+			if (arguments.length === 0) {
+				return this.data;
+			}
+
+			return this.data[prop];
+		},
+
+		/**
+		 * @param {string} prop
+		 * @param {*} value
+		 * @returns {TemplateView}
+		 */
+		set: function (prop, value) {
+			var oldValue = this.get(prop);
+
+			if (oldValue === value) return this;
+
+			var sourceIndex = this.wrappers.sources.indexOf(oldValue);
+
+			if (sourceIndex !== -1) {
+				this.wrappers.targets[sourceIndex].clear();
+			}
+
+			this.data[prop] = value;
+
+			this.trigger('set/' + prop, value, oldValue);
+			this.trigger('set/*', [], prop, value, oldValue);
+			this.trigger('set', prop, value, oldValue);
+
+			return this;
+		},
+
+		model: function (prop) {
+			if (prop instanceof Array) {
+				var model = this;
+
+				for (var i = 0, len = prop.length; i < len; i++) {
+					model = model.model(prop[i]);
+				}
+
+				return model;
+			}
+
+			var source = this.get(prop),
+				index = this.wrappers.sources.indexOf(source);
+
+			if (index === -1) {
+				index = this.wrappers.sources.push(source) - 1;
+				this.wrappers.targets.push(this.wrapper(source, [prop]));
+			}
+
+			return this.wrappers.targets[index];
+		},
+
+		wrapper: function (item, path) {
+			var Wrapper = item instanceof Array ? ArrayWrapper : ObjectWrapper;
+
+			return new Wrapper(this, path, item);
 		},
 
 		/**
@@ -759,12 +750,19 @@
 	function eachHelper(view, selector, options) {
 		var node = view.find(selector),
 			list = view.model(options.prop),
+			views = new ViewsList(),
 			tplSelector = options.node || '> *';
 
 		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? node.find(tplSelector) : $(tplSelector);
 		tpl.detach();
 
-		list.forEach(function (item) {
+		list.views = list.views || {};
+		list.views[selector] = views;
+
+		view.listenOn(list, 'add', add);
+		view.listenOn(list, 'remove', remove);
+
+		function add(item, index) {
 			var ViewClass, itemView;
 
 			if (isClass(options.view)) {
@@ -795,12 +793,30 @@
 				itemView = new ViewClass({
 					node: tpl.clone(),
 					parent: view,
+					context: item,
 					data: typeof item !== 'object' ? {value: item} : extend({}, item)
 				});
 			}
 
-			node.append(itemView.node);
-		});
+			views.add(itemView);
+
+			if (index === 0) {
+				node.prepend(itemView.node);
+			}
+			else {
+				var children = node.children();
+				if (index >= children.length) {
+					node.append(itemView.node);
+				}
+				else {
+					itemView.node.insertAfter(children.get(index - 1));
+				}
+			}
+		}
+
+		function remove(item) {
+			views.getByContext(item).node.remove();
+		}
 	}
 
 	//endregion
@@ -908,14 +924,16 @@
 	//region ====================== ObjectWrapper =================================
 
 	function ObjectWrapper(view, path, context) {
+		EventsHandler.call(this);
+
 		this.view = view;
 		this.path = path;
 		this.key = path.join('.');
 		this.context = context;
 	}
 
-	extend(ObjectWrapper, {
-		extend: TemplateView.extend
+	EventsHandler.extend({
+		constructor: ObjectWrapper
 	});
 
 	extend(ObjectWrapper.prototype, {
@@ -940,14 +958,9 @@
 
 			this.context[prop] = value;
 
-			this.trigger('set/' + this.key + '.' + prop, value, oldValue);
-			this.trigger('set/' + this.key + '.*', prop, value, oldValue);
-			this.trigger('set/*', this.path, prop, value, oldValue);
+			this.trigger('set/' + prop, value, oldValue);
+			this.trigger('set/*', prop, value, oldValue);
 			return this;
-		},
-
-		trigger: function () {
-			this.view.trigger.apply(this.view, arguments);
 		},
 
 		model: function (prop) {
@@ -994,10 +1007,6 @@
 		ObjectWrapper.apply(this, arguments);
 	}
 
-	extend(ArrayWrapper, {
-		extend: TemplateView.extend
-	});
-
 	ObjectWrapper.extend({
 		constructor: ArrayWrapper,
 
@@ -1035,63 +1044,65 @@
 				else {
 					arr.splice(itemIndex, 0, item);
 				}
-				this.trigger('add/' + this.key, item, itemIndex);
-				this.trigger('add/*', this.path, item, itemIndex);
+				this.trigger('add', item, itemIndex);
 			}
 
 			return this;
 		},
 
-		remove: function (items) {
-			if (items instanceof Array === false) {
-				items = [items];
-			}
-
-			var list = this;
-
-			this.removeAt(items.map(function (item) {
-				return list.indexOf(item);
-			}));
-
-			return this;
-		},
-
-		removeAt: function (indexes) {
-			if (indexes instanceof Array === false) {
-				indexes = [indexes];
-			}
-
-			indexes = indexes.length === 1 ? indexes : [].concat(indexes).sort(function (a, b) {
-				return b - a;
-			});
-
-			var arr = this.context;
-
-			for (var i = 0, len = indexes.length; i < len; i++) {
-				var index = indexes[i],
-					item = arr[index],
-					sourceIndex = this.view.wrappers.sources.indexOf(item);
-
-				if (sourceIndex !== -1) {
-					this.view.wrappers.targets[sourceIndex].clear();
+		remove: function (item) {
+			if (item instanceof Array) {
+				for (var i = 0, len = item.length; i < len; i++) {
+					this.remove(item[i]);
 				}
 
-				arr.splice(index, 1);
-				this.trigger('remove/' + this.key, item, index);
-				this.trigger('remove/*', this.path, item, index);
+				return this;
 			}
+
+			this.removeAt(this.indexOf(item));
+
+			return this;
+		},
+
+		removeAt: function (index) {
+			if (index instanceof Array) {
+				index = index.length === 1 ? index : [].concat(index).sort(function (a, b) {
+					return b - a;
+				});
+
+				for (var i = 0, len = index.length; i < len; i++) {
+					this.removeAt(index[i]);
+				}
+
+				return this;
+			}
+
+			var arr = this.context,
+				item = arr[index],
+				sourceIndex = this.view.wrappers.sources.indexOf(item);
+
+			if (sourceIndex !== -1) {
+				this.view.wrappers.targets[sourceIndex].clear();
+			}
+
+			if (index + 1 === arr.length) {
+				arr.pop();
+			}
+			else if (index === 0) {
+				arr.shift();
+			}
+			else {
+				arr.splice(index, 1);
+			}
+
+			this.trigger('remove', item, index);
 
 			return this;
 		},
 
 		removeAll: function () {
-			var arr = this.context;
-
-			for (var i = arr.length - 1; i > -1; i--) {
-				var item = arr[i];
-				arr.pop();
-				this.trigger('remove/' + this.key, item, i);
-				this.trigger('remove/*', this.path, item, i);
+			for (var i = this.length() - 1; i > -1; i--) {
+				this.removeAt(i);
 			}
 
 			return this;
@@ -1111,6 +1122,32 @@
 	//endregion
 
 	//region ====================== Utils =========================================
+
+	function extendClass(properties) {
+		properties = properties || {};
+
+		var Parent = this;
+		var Child = properties.hasOwnProperty('constructor') ? properties.constructor : function () { Parent.apply(this, arguments); };
+
+		if (Object.create) {
+			Child.prototype = Object.create(Parent.prototype);
+		}
+		else {
+			var Extend = function () {};
+			Extend.prototype = properties;
+			Child.prototype = new Extend();
+		}
+
+		Child.prototype.constructor = Child;
+
+		extend(Child.prototype, properties);
+
+		Child.extend = Parent.extend;
+		Child.parent = Parent;
+		Child.__super__ = Parent.prototype;
+
+		return Child;
+	}
 
 	function extend(target, source) {
 	    for (var name in source) {
