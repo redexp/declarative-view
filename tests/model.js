@@ -127,4 +127,27 @@ describe('model', function () {
 		expect(view.wrappers.sources.length).to.equal(0);
 		expect(view.wrappers.targets.length).to.equal(0);
 	});
+
+	it('should stop listen view', function () {
+		var view = new TemplateView({
+			data: {
+				test: {
+					users: [
+						{
+							name: 'value'
+						}
+					]
+				}
+			}
+		});
+
+		var set = sinon.spy();
+		view.on('@test.users.0.name', set);
+		expect(set).to.have.callCount(1);
+		view.set(['test', 'users', 0, 'name'], 'test');
+		expect(set).to.have.callCount(2);
+		view.model('test').clear();
+		view.set(['test', 'users', 0, 'name'], 'test2');
+		expect(set).to.have.callCount(2);
+	});
 });

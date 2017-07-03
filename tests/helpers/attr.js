@@ -22,7 +22,10 @@ describe('attr helper', function () {
 			node: '<div><div class="test"></div><div class="iterator"></div><div class="iterator"></div></div>',
 
 			data: {
-				prop: 'test'
+				prop: 'test',
+				sub: {
+					prop: 'value'
+				}
 			},
 
 			template: {
@@ -30,7 +33,9 @@ describe('attr helper', function () {
 					'attr': {
 						'test-event': 'event',
 						'test-eq-prop': '=prop',
+						'test-eq-sub-prop': '=sub.prop',
 						'test-a-prop': '@prop',
+						'test-a-sub-prop': '@sub.prop',
 						'test-object': {
 							'object-event-1': objectEvent1
 						},
@@ -55,7 +60,9 @@ describe('attr helper', function () {
 		
 		expect(test).not.to.have.attr('test-event');
 		expect(test).to.have.attr('test-eq-prop', 'test');
+		expect(test).to.have.attr('test-eq-sub-prop', 'value');
 		expect(test).to.have.attr('test-a-prop', 'test');
+		expect(test).to.have.attr('test-a-sub-prop', 'value');
 		expect(test).not.to.have.attr('test-object');
 		expect(test).to.have.attr('test-function');
 		expect(testFunction).to.have.callCount(1);
@@ -84,7 +91,11 @@ describe('attr helper', function () {
 		expect(test).to.have.attr('test-a-prop', 'value2');
 		view.set('prop', null);
 		expect(test).not.to.have.attr('test-a-prop');
-		
+
+		view.model('sub').set('prop', 'sub2');
+		expect(test).to.have.attr('test-eq-sub-prop', 'value');
+		expect(test).to.have.attr('test-a-sub-prop', 'sub2');
+
 		view.trigger('object-event-1', 1, 2, 10);
 		expect(objectEvent1).to.have.callCount(1);
 		expect(objectEvent1).to.be.calledWith(1, 2, 10);

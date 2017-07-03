@@ -66,6 +66,10 @@
 					event = 'set/' + prop;
 				}
 
+				if ((eq || a) && prop.indexOf('.') > -1) {
+					prop = prop.split('.');
+				}
+
 				if (not || prop) {
 					wrapper = function (x) {
 						var arg = prop ? view.get(prop) : x;
@@ -77,7 +81,7 @@
 						var args = [arg];
 
 						if (arguments.length > 0) {
-							args = args.concat(slice(arguments, 0));
+							args = args.concat(slice(arguments, prop && !not ? 1 : 0));
 						}
 
 						callback.apply(context || view, args);
@@ -85,7 +89,7 @@
 				}
 
 				if (eq || a) {
-					wrapper();
+					wrapper(view.get(prop));
 				}
 
 				if (eq) return;
@@ -102,6 +106,10 @@
 					callback: callback,
 					wrapper: wrapper
 				});
+
+				if (prop instanceof Array) {
+					view.listenOn(modelByProp(view, prop), 'set/' + lastItem(prop), wrapper);
+				}
 			});
 
 			return this;
@@ -137,9 +145,12 @@
 				if (!callbacks) continue;
 
 				if (callback) {
-					spliceBy(callbacks, findItem(callbacks, function (params) {
-						return params.callback === callback;
-					}));
+					for (var j = 0, cLen = callbacks.length; j < cLen; j++) {
+						if (callbacks[j].callback === callback) {
+							callbacks.splice(j, 1);
+							break;
+						}
+					}
 
 					if (callbacks.length === 0) {
 						delete this.events[event];
@@ -332,12 +343,12 @@
 			var args = slice(arguments, 1),
 				once = false;
 
-			callback = args[args.length - 1];
+			callback = lastItem(args);
 
 			if (typeof callback === 'boolean') {
 				once = callback;
 				args.pop();
-				callback = args[args.length - 1];
+				callback = lastItem(args);
 			}
 
 			return this.listenTo({
@@ -457,6 +468,15 @@
 			if (arguments.length === 0) {
 				return this.data;
 			}
+			else if(prop instanceof Array) {
+				var model = this;
+
+				for (var i = 0, len = prop.length - 1; i < len; i++) {
+					model = model.model(prop[i]);
+				}
+
+				return model.get(prop[len]);
+			}
 
 			return this.data[prop];
 		},
@@ -477,10 +497,15 @@
 				this.wrappers.targets[sourceIndex].clear();
 			}
 
+			if (prop instanceof Array) {
+				var model = modelByProp(this, prop);
+				model.set(lastItem(prop), value);
+				return this;
+			}
+
 			this.data[prop] = value;
 
 			this.trigger('set/' + prop, value, oldValue);
-			this.trigger('set/*', [], prop, value, oldValue);
 			this.trigger('set', prop, value, oldValue);
 
 			return this;
@@ -969,6 +994,10 @@
 			var index = this.view.wrappers.sources.indexOf(this.context);
 
 			if (index !== -1) {
+				var target = this.view.wrappers.targets[index];
+
+				this.view.stopListening(target);
+
 				this.view.wrappers.sources.splice(index, 1);
 				this.view.wrappers.targets.splice(index, 1);
 			}
@@ -1235,6 +1264,10 @@
 		}
 	}
 
+	function lastItem(arr) {
+		return arr[arr.length - 1];
+	}
+
 	/**
 	 * @param {string|Array} events
 	 * @returns {Array<string>}
@@ -1280,6 +1313,14 @@
 
 	function isClass(func) {
 		return typeof func === 'function' && typeof func.extend === 'function';
+	}
+
+	function modelByProp(view, prop) {
+		var model = view;
+		for (var i = 0, len = prop.length - 1; i < len; i++) {
+			model = model.model(prop[i]);
+		}
+		return model;
 	}
 
 	//endregion
