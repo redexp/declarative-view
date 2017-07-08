@@ -22,7 +22,7 @@ describe('model', function () {
 		var setName = sinon.spy();
 		var set = sinon.spy();
 		user.on('set/name', setName);
-		user.on('set/*', set);
+		user.on('set', set);
 		user.set('name', 'value2');
 		expect(view.data.test.user.name).to.equal('value2');
 		expect(setName).to.have.callCount(1);

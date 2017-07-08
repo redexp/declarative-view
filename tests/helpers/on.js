@@ -4,8 +4,10 @@ describe('on, once helpers', function () {
 		var clickCb = sinon.spy();
 		var spanCb = sinon.spy();
 
-		var view = new TemplateView({
+		var View = TemplateView.extend({
 			node: '<div><span></span><input type="text"/></div>',
+
+			test: testCb,
 
 			template: {
 				'@root': {
@@ -21,7 +23,7 @@ describe('on, once helpers', function () {
 			}
 		});
 
-		view.test = testCb;
+		var view = new View();
 
 		expect(testCb).to.have.callCount(0);
 		expect(clickCb).to.have.callCount(0);
@@ -99,8 +101,10 @@ describe('on, once helpers', function () {
 		var clickCb = sinon.spy();
 		var spanCb = sinon.spy();
 
-		var view = new TemplateView({
+		var View = TemplateView.extend({
 			node: '<div><span></span><input type="text"/></div>',
+
+			test: testCb,
 
 			template: {
 				'@root': {
@@ -116,7 +120,7 @@ describe('on, once helpers', function () {
 			}
 		});
 
-		view.test = testCb;
+		var view = new View();
 
 		expect(testCb).to.have.callCount(0);
 		expect(clickCb).to.have.callCount(0);

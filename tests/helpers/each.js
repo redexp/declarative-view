@@ -1,4 +1,4 @@
-describe.skip('each helper', function () {
+describe('each helper', function () {
 	it('should be empty', function () {
 		var view = new TemplateView({
 			node: '<ul><li></li></ul>',
@@ -248,7 +248,7 @@ describe.skip('each helper', function () {
 		expect(cb.getCall(1).args[1]).to.be.instanceOf(TemplateView.$);
 	});
 
-	it.skip('should listen add, remove of ArrayWrapper', function () {
+	it('should listen add and remove events', function () {
 		var view = new TemplateView({
 			node: '<ul><li></li></ul>',
 
@@ -302,16 +302,102 @@ describe.skip('each helper', function () {
 		view.model('users').remove([view.data.users[1], view.data.users[3]]);
 		expect(view.node.children().length).to.equal(3);
 		expect(view.node.children().eq(0)).to.have.text('value5');
-		expect(view.node.children().eq(2)).to.have.text('value4');
-		expect(view.node.children().eq(4)).to.have.text('value3');
+		expect(view.node.children().eq(1)).to.have.text('value4');
+		expect(view.node.children().eq(2)).to.have.text('value3');
 		view.model('users').removeAt(0);
 		expect(view.node.children().length).to.equal(2);
-		expect(view.node.children().eq(2)).to.have.text('value4');
-		expect(view.node.children().eq(4)).to.have.text('value3');
+		expect(view.node.children().eq(0)).to.have.text('value4');
+		expect(view.node.children().eq(1)).to.have.text('value3');
 		view.model('users').removeAt([1]);
 		expect(view.node.children().length).to.equal(1);
-		expect(view.node.children().eq(2)).to.have.text('value4');
+		expect(view.node.children().eq(0)).to.have.text('value4');
 		view.model('users').removeAll();
 		expect(view.node.children().length).to.equal(0);
+	});
+
+	it('should listen move event', function () {
+		var view = new TemplateView({
+			node: '<ul><li class="first"></li><li class="test"></li></ul>',
+
+			data: {
+				users: []
+			},
+
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						node: '> .test',
+						template: {
+							'@root': {
+								text: '=value'
+							}
+						}
+					}
+				}
+			}
+		});
+
+		var users = view.model('users');
+		var node = view.node;
+		users.add(['user1', 'user2', 'user3']);
+		users.move('user1', 1);
+		expect(view.get('users')).to.eql(['user2', 'user1', 'user3']);
+		expect(node.children().eq(1)).to.have.text('user2');
+		expect(node.children().eq(2)).to.have.text('user1');
+		expect(node.children().eq(3)).to.have.text('user3');
+		users.moveFrom(2, 0);
+		expect(view.get('users')).to.eql(['user3', 'user2', 'user1']);
+		expect(node.children().eq(1)).to.have.text('user3');
+		expect(node.children().eq(2)).to.have.text('user2');
+		expect(node.children().eq(3)).to.have.text('user1');
+
+		expect(node.children().eq(0)).to.have.class('first').and.text('');
+		expect(node.children().length).to.equal(4);
+	});
+
+	it('should listen sort event', function () {
+		var view = new TemplateView({
+			node: '<ul><li class="first"></li><li class="test"></li></ul>',
+
+			data: {
+				users: []
+			},
+
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						node: '> .test',
+						template: {
+							'@root': {
+								text: '=value'
+							}
+						}
+					}
+				}
+			}
+		});
+
+		var users = view.model('users');
+		var node = view.node;
+		users.add(['user1', 'user2', 'user3']);
+		users.sort(function (a, b) {
+			return b.slice(-1) - a.slice(-1);
+		});
+		expect(view.get('users')).to.eql(['user3', 'user2', 'user1']);
+		expect(node.children().eq(1)).to.have.text('user3');
+		expect(node.children().eq(2)).to.have.text('user2');
+		expect(node.children().eq(3)).to.have.text('user1');
+		users.sort(function (a, b) {
+			return a.slice(-1) - b.slice(-1);
+		});
+		expect(view.get('users')).to.eql(['user1', 'user2', 'user3']);
+		expect(node.children().eq(1)).to.have.text('user1');
+		expect(node.children().eq(2)).to.have.text('user2');
+		expect(node.children().eq(3)).to.have.text('user3');
+
+		expect(node.children().eq(0)).to.have.class('first').and.text('');
+		expect(node.children().length).to.equal(4);
 	});
 });

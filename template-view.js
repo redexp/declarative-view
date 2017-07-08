@@ -409,10 +409,6 @@
 			this.parent = options.parent;
 		}
 
-		if (options.context) {
-			this.context = options.context;
-		}
-
 		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
 		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
 		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
@@ -534,7 +530,7 @@
 		},
 
 		wrapper: function (item, path) {
-			var Wrapper = item instanceof Array ? ArrayWrapper : ObjectWrapper;
+			var Wrapper = item instanceof Array ? ViewArrayWrapper : ViewObjectWrapper;
 
 			return new Wrapper(this, path, item);
 		},
@@ -554,6 +550,13 @@
 			}
 
 			return selector ? this.node.find(selector) : this.node;
+		},
+
+		remove: function () {
+			this.stopListening();
+			this.off();
+			this.node.remove();
+			return this;
 		}
 	});
 
@@ -767,12 +770,12 @@
 	//region ====================== Each Helper ===================================
 
 	function eachHelper(view, selector, options) {
-		var node = view.find(selector),
+		var root = view.find(selector),
 			list = view.model(options.prop),
-			views = new ViewsList(),
+			views = new ViewsList([]),
 			tplSelector = options.node || '> *';
 
-		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? node.find(tplSelector) : $(tplSelector);
+		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
 		tpl.detach();
 
 		list.views = list.views || {};
@@ -780,6 +783,10 @@
 
 		view.listenOn(list, 'add', add);
 		view.listenOn(list, 'remove', remove);
+		view.listenOn(list, 'move', move);
+		view.listenOn(list, 'sort', sort);
+
+		list.forEach(add);
 
 		function add(item, index) {
 			var ViewClass, itemView;
@@ -812,29 +819,55 @@
 				itemView = new ViewClass({
 					node: tpl.clone(),
 					parent: view,
-					context: item,
 					data: typeof item !== 'object' ? {value: item} : extend({}, item)
 				});
 			}
 
-			views.add(itemView);
+			itemView.context = item;
+
+			views.add(itemView, index);
 
 			if (index === 0) {
-				node.prepend(itemView.node);
-			}
-			else {
-				var children = node.children();
-				if (index >= children.length) {
-					node.append(itemView.node);
+				if (views.length() === 1) {
+					root.append(itemView.node);
 				}
 				else {
-					itemView.node.insertAfter(children.get(index - 1));
+					itemView.node.insertBefore(views.get(1).node);
 				}
+			}
+			else if (index >= views.length()) {
+				root.append(itemView.node);
+			}
+			else {
+				itemView.node.insertAfter(views.get(index - 1).node);
 			}
 		}
 
-		function remove(item) {
-			views.getByContext(item).node.remove();
+		function remove(item, index) {
+			views.get(index).remove();
+			views.removeAt(index);
+		}
+
+		function move(item, index, oldIndex) {
+			views.moveFrom(oldIndex, index);
+			var node = views.get(index).node;
+			if (index === 0) {
+				if (views.length() === 1) {
+					node.appendTo(root);
+				}
+				else {
+					node.insertBefore(views.get(1).node);
+				}
+			}
+			else {
+				node.insertAfter(views.get(index - 1).node);
+			}
+		}
+
+		function sort() {
+			list.forEach(function (item, index) {
+				move(item, index, views.indexByContext(item));
+			});
 		}
 	}
 
@@ -942,12 +975,9 @@
 
 	//region ====================== ObjectWrapper =================================
 
-	function ObjectWrapper(view, path, context) {
+	function ObjectWrapper(context) {
 		EventsHandler.call(this);
 
-		this.view = view;
-		this.path = path;
-		this.key = path.join('.');
 		this.context = context;
 	}
 
@@ -965,19 +995,15 @@
 
 			if (oldValue === value) return this;
 
-			var sourceIndex = this.view.wrappers.sources.indexOf(oldValue);
-
-			if (sourceIndex !== -1) {
-				this.view.wrappers.targets[sourceIndex].clear();
-			}
-
 			this.context[prop] = value;
 
 			this.trigger('set/' + prop, value, oldValue);
-			this.trigger('set/*', prop, value, oldValue);
+			this.trigger('set', prop, value, oldValue);
 			return this;
-		},
+		}
+	});
 
+	var ModelMixin = {
 		model: function (prop) {
 			var source = this.get(prop),
 				index = this.view.wrappers.sources.indexOf(source);
@@ -1014,9 +1040,26 @@
 				}
 			}
 
-			this.view = this.path = this.key = this.context = null;
+			this.view = this.path = this.context = null;
 		}
-	});
+	};
+
+	function ViewObjectWrapper(view, path, context) {
+		ObjectWrapper.call(this, context);
+
+		this.view = view;
+		this.path = path;
+
+		this.on('set', function (prop, value, oldValue) {
+			var sourceIndex = this.view.wrappers.sources.indexOf(oldValue);
+
+			if (sourceIndex !== -1) {
+				this.view.wrappers.targets[sourceIndex].clear();
+			}
+		});
+	}
+
+	extendClass(ViewObjectWrapper, ObjectWrapper, ModelMixin);
 
 	//endregion
 
@@ -1094,13 +1137,11 @@
 				return this;
 			}
 
-			var arr = this.context,
-				item = arr[index],
-				sourceIndex = this.view.wrappers.sources.indexOf(item);
+			var arr = this.context;
 
-			if (sourceIndex !== -1) {
-				this.view.wrappers.targets[sourceIndex].clear();
-			}
+			if (!arr.hasOwnProperty(index)) return this;
+
+			var item = arr[index];
 
 			if (index + 1 === arr.length) {
 				arr.pop();
@@ -1133,6 +1174,53 @@
 			this.removeAt(index);
 			this.add(newItem, index);
 			return this;
+		},
+
+		move: function (item, index) {
+			return this.moveFrom(this.indexOf(item), index);
+		},
+
+		moveFrom: function (oldIndex, newIndex) {
+			if (oldIndex === newIndex) return this;
+
+			var item = this.get(oldIndex);
+			this.context.splice(oldIndex, 1);
+			this.context.splice(newIndex, 0, item);
+			this.trigger('move', item, newIndex, oldIndex);
+			return this;
+		},
+
+		sort: function (callback) {
+			this.context.sort(callback);
+			this.trigger('sort');
+			return this;
+		}
+	});
+
+	function ViewArrayWrapper(view, path, context) {
+		ViewObjectWrapper.apply(this, arguments);
+
+		this.on('remove', function (item) {
+			var sourceIndex = this.view.wrappers.sources.indexOf(item);
+
+			if (sourceIndex !== -1) {
+				this.view.wrappers.targets[sourceIndex].clear();
+			}
+		});
+	}
+
+	extendClass(ViewArrayWrapper, ArrayWrapper, ModelMixin);
+
+	function ViewsList() {
+		ArrayWrapper.apply(this, arguments);
+	}
+
+	extendClass(ViewsList, ArrayWrapper, {
+		indexByContext: function (context) {
+			var arr = this.context;
+			for (var i = 0, len = arr.length; i < len; i++) {
+				if (arr[i].context === context) return i;
+			}
 		}
 	});
 
