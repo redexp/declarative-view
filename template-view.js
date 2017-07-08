@@ -827,6 +827,11 @@
 
 			views.add(itemView, index);
 
+			if (options.add) {
+				options.add.call(view, root, itemView, index);
+				return;
+			}
+
 			if (index === 0) {
 				if (views.length() === 1) {
 					root.append(itemView.node);
@@ -835,22 +840,32 @@
 					itemView.node.insertBefore(views.get(1).node);
 				}
 			}
-			else if (index >= views.length()) {
-				root.append(itemView.node);
-			}
 			else {
 				itemView.node.insertAfter(views.get(index - 1).node);
 			}
 		}
 
 		function remove(item, index) {
-			views.get(index).remove();
+			if (options.remove) {
+				options.remove.call(view, root, views.get(index), index);
+			}
+			else {
+				views.get(index).remove();
+			}
+
 			views.removeAt(index);
 		}
 
 		function move(item, index, oldIndex) {
 			views.moveFrom(oldIndex, index);
+
+			if (options.move) {
+				options.move.call(view, root, views.get(index), index, oldIndex);
+				return;
+			}
+
 			var node = views.get(index).node;
+
 			if (index === 0) {
 				if (views.length() === 1) {
 					node.appendTo(root);
@@ -865,8 +880,15 @@
 		}
 
 		function sort() {
+			if (options.sort) {
+				options.sort.call(view, root, views);
+				return;
+			}
+
 			list.forEach(function (item, index) {
-				move(item, index, views.indexByContext(item));
+				var oldIndex = views.indexByContext(item);
+				if (index === oldIndex) return;
+				move(item, index, oldIndex);
 			});
 		}
 	}

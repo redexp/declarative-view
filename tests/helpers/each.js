@@ -400,4 +400,104 @@ describe('each helper', function () {
 		expect(node.children().eq(0)).to.have.class('first').and.text('');
 		expect(node.children().length).to.equal(4);
 	});
+
+	it('add, remove, move options', function () {
+		var add = sinon.spy();
+		var remove = sinon.spy();
+		var move = sinon.spy();
+
+		var view = new TemplateView({
+			node: '<ul><li></li></ul>',
+
+			data: {
+				users: ['user1', 'user2', 'user3']
+			},
+
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						template: {
+							'@root': {
+								text: '=value'
+							}
+						},
+						add: add,
+						remove: remove,
+						move: move
+					}
+				}
+			}
+		});
+
+		var list = view.model('users');
+		var views = list.views['@root'];
+
+		expect(view.node.children().length).to.equal(0);
+		expect(add).to.have.callCount(3);
+		expect(add).to.be.calledWith(view.node, views.get(2), 2);
+		list.add('user4');
+		expect(add).to.have.callCount(4);
+		expect(add).to.be.calledWith(view.node, views.get(3), 3);
+		var itemView = views.get(2);
+		list.remove('user3');
+		expect(remove).to.have.callCount(1);
+		expect(remove).to.be.calledWith(view.node, itemView, 2);
+		list.move('user2', 0);
+		expect(move).to.have.callCount(1);
+		expect(move).to.be.calledWith(view.node, views.get(0), 0, 1);
+		list.sort();
+		expect(move).to.have.callCount(2);
+		expect(move).to.be.calledWith(view.node, views.get(0), 0, 1);
+
+		expect(add).to.be.always.calledOn(view);
+		expect(remove).to.be.always.calledOn(view);
+		expect(move).to.be.always.calledOn(view);
+	});
+
+	it('sort options', function () {
+		var add = sinon.spy();
+		var remove = sinon.spy();
+		var move = sinon.spy();
+		var sort = sinon.spy();
+
+		var view = new TemplateView({
+			node: '<ul><li></li></ul>',
+
+			data: {
+				users: ['user1', 'user2', 'user3']
+			},
+
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						template: {
+							'@root': {
+								text: '=value'
+							}
+						},
+						add: add,
+						remove: remove,
+						move: move,
+						sort: sort
+					}
+				}
+			}
+		});
+
+		var list = view.model('users');
+		var views = list.views['@root'];
+
+		list.move('user2', 0);
+		expect(move).to.have.callCount(1);
+		expect(move).to.be.calledWith(view.node, views.get(0), 0, 1);
+		list.sort();
+		expect(move).to.have.callCount(1);
+		expect(sort).to.have.callCount(1);
+		expect(sort).to.be.calledWith(view.node, views);
+
+		expect(move).to.be.always.calledOn(view);
+		expect(sort).to.be.always.calledOn(view);
+	});
 });
