@@ -15,7 +15,7 @@ describe('class helper', function () {
 		});
 
 		var functionIterator = sinon.spy(function (node, i) {
-			expect(node).to.be.instanceOf(TemplateView.$);
+			expect(node).to.be.instanceOf(DeclarativeView.$);
 
 			return i;
 		});
@@ -24,7 +24,7 @@ describe('class helper', function () {
 			return functionIterator;
 		});
 
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<div><div class="test"></div><div class="iterator"></div><div class="iterator"></div></div>',
 			
 			data: {

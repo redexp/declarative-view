@@ -6,7 +6,7 @@
 		module.exports = factory(jQuery);
 	}
 	else {
-		window.TemplateView = factory(jQuery);
+		window.DeclarativeView = factory(jQuery);
 	}
 })(function ($) {
 
@@ -34,7 +34,7 @@
 		 * @param {Function} callback
 		 * @param {Object|boolean} [context]
 		 * @param {boolean} [once]
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		on: function (events, callback, context, once) {
 			events = splitEvents(events);
@@ -123,7 +123,7 @@
 		 * @param {string|Array} events
 		 * @param {Function} callback
 		 * @param {Object} [context]
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		once: function (events, callback, context) {
 			return this.on(events, callback, context, true);
@@ -132,7 +132,7 @@
 		/**
 		 * @param {string|Array} [events]
 		 * @param {Function} [callback]
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		off: function (events, callback) {
 			if (arguments.length === 0) {
@@ -170,7 +170,7 @@
 
 		/**
 		 * @param {string} event
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		trigger: function (event) {
 			var listeners = this.events[event];
@@ -206,7 +206,7 @@
 		 * 	once: boolean,
 		 * 	on: function,
 		 * 	off: function }} params
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		listenTo: function (params) {
 			var view = this,
@@ -261,7 +261,7 @@
 		 * @param {Object} [target]
 		 * @param {string|Array} [events]
 		 * @param {Function} [callback]
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		stopListening: function (target, events, callback) {
 			var listener;
@@ -341,7 +341,7 @@
 		 * @param {Object} target
 		 * @param {string} events
 		 * @param {...*} callback
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		listenOn: function (target, events, callback) {
 			var args = slice(arguments, 1),
@@ -387,7 +387,7 @@
 		 * @param {Object} target
 		 * @param {string} events
 		 * @param {...*} callback
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		listenOnce: function (target, events, callback) {
 			var args = slice(arguments, 0);
@@ -400,12 +400,12 @@
 
 	//endregion
 
-	function TemplateView(options) {
-		TemplateView.parent.apply(this, arguments);
+	function DeclarativeView(options) {
+		DeclarativeView.parent.apply(this, arguments);
 
 		options = options || {};
 
-		this.id = TemplateView.nextId();
+		this.id = DeclarativeView.nextId();
 		this.wrappers = {sources: [], targets: []};
 		this.node = $(options.node || this.node || '<div>');
 
@@ -435,10 +435,10 @@
 			ensureUI(this, name);
 		}
 
-		TemplateView.helpers.template(this, '', this.template);
+		DeclarativeView.helpers.template(this, '', this.template);
 	}
 
-	extend(TemplateView, {
+	extend(DeclarativeView, {
 		$: $,
 
 		ObjectWrapper: ObjectWrapper,
@@ -455,7 +455,7 @@
 		}
 	});
 
-	extendClass(TemplateView, EventsHandler, {
+	extendClass(DeclarativeView, EventsHandler, {
 		ui: {
 			root: ''
 		},
@@ -484,7 +484,7 @@
 		/**
 		 * @param {string} prop
 		 * @param {*} value
-		 * @returns {TemplateView}
+		 * @returns {DeclarativeView}
 		 */
 		set: function (prop, value) {
 			var oldValue = this.get(prop);
@@ -564,7 +564,7 @@
 		}
 	});
 
-	TemplateView.helpers = {
+	DeclarativeView.helpers = {
 		template: templateHelper,
 		'class': classHelper,
 		toggleClass: classHelper,
@@ -606,12 +606,12 @@
 				}
 
 				if (_DEV_) {
-					if (!TemplateView.helpers.hasOwnProperty(helper)) {
+					if (!DeclarativeView.helpers.hasOwnProperty(helper)) {
 						throw new Error('Unknown helper "' + helper + '" in template of ' + view.constructor.name);
 					}
 				}
 
-				TemplateView.helpers[helper](view, root + selector, helpers[helper]);
+				DeclarativeView.helpers[helper](view, root + selector, helpers[helper]);
 			}
 		}
 	}
@@ -810,7 +810,7 @@
 				}
 			}
 			else {
-				ViewClass = TemplateView;
+				ViewClass = DeclarativeView;
 			}
 
 			if (ViewClass && options.template) {
@@ -1439,5 +1439,5 @@
 
 	//endregion
 
-	return TemplateView;
+	return DeclarativeView;
 });

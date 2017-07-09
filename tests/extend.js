@@ -2,7 +2,7 @@ require('./setup');
 
 describe('extend', function () {
 	it('should work', function () {
-		var View = TemplateView.extend({
+		var View = DeclarativeView.extend({
 			node: '<div><div class="test"></div><div class="active"></div></div>',
 
 			ui: {

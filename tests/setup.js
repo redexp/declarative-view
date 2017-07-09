@@ -7,12 +7,12 @@
 		sinonChai,
 		sinon,
 		jQuery,
-		TemplateView
+		DeclarativeView
 	) {
 		scope.expect = chai.expect;
 		scope.sinon = sinon;
 		scope.jQuery = jQuery;
-		scope.TemplateView = TemplateView;
+		scope.DeclarativeView = DeclarativeView;
 
 		chai.use(chaiJquery);
 		chai.use(sinonChai);
@@ -25,7 +25,7 @@
 			'sinon-chai',
 			'sinon',
 			'jquery',
-			'template-view'
+			'declarative-view'
 		], setup);
 
 		define('../setup', [], function () {
@@ -43,7 +43,7 @@
 			require('sinon-chai'),
 			require('sinon'),
 			jQuery,
-			require('../template-view')
+			require('../declarative-view')
 		);
 	}
 })();

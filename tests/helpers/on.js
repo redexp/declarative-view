@@ -6,7 +6,7 @@ describe('on, once helpers', function () {
 		var clickCb = sinon.spy();
 		var spanCb = sinon.spy();
 
-		var View = TemplateView.extend({
+		var View = DeclarativeView.extend({
 			node: '<div><span></span><input type="text"/></div>',
 
 			test: testCb,
@@ -103,7 +103,7 @@ describe('on, once helpers', function () {
 		var clickCb = sinon.spy();
 		var spanCb = sinon.spy();
 
-		var View = TemplateView.extend({
+		var View = DeclarativeView.extend({
 			node: '<div><span></span><input type="text"/></div>',
 
 			test: testCb,

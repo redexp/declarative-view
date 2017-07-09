@@ -2,7 +2,7 @@ require('../setup');
 
 describe('template helper', function () {
     it('should work', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<div><div class="test"><div class="inner"></div></div><div class="test text"></div></div>',
 			template: {
 				'@root': {

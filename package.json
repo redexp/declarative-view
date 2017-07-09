@@ -1,9 +1,9 @@
 {
-  "name": "template-view",
+  "name": "declarative-view",
   "version": "1.0.0",
   "description": "View class based on jQuery with declarative configuration",
-  "keywords": ["view", "jquery", "template", "declarative"],
-  "main": "template-view.js",
+  "keywords": ["view", "jquery", "declarative"],
+  "main": "declarative-view.js",
   "directories": {
     "test": "tests"
   },
@@ -25,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redexp/template-view.git"
+    "url": "git+https://github.com/redexp/declarative-view.git"
   },
   "author": "Sergii Kliuchnyk",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/redexp/template-view/issues"
+    "url": "https://github.com/redexp/declarative-view/issues"
   },
-  "homepage": "https://github.com/redexp/template-view#readme"
+  "homepage": "https://github.com/redexp/declarative-view#readme"
 }

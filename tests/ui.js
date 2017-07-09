@@ -2,7 +2,7 @@ require('./setup');
 
 describe('ui', function () {
 	it('should handle ui names in selectors', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<div><div class="inner"><div class="test"></div></div><div class="test"></div></div>',
 
 			ui: {

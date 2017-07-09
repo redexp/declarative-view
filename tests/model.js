@@ -2,7 +2,7 @@ require('./setup');
 
 describe('model', function () {
 	it('object model', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				test: {
 					user: {
@@ -47,7 +47,7 @@ describe('model', function () {
 	});
 
 	it('array model', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				test: {
 					users: [
@@ -93,7 +93,7 @@ describe('model', function () {
 	});
 
 	it('remove model', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				test: {
 					prop: {
@@ -131,7 +131,7 @@ describe('model', function () {
 	});
 
 	it('should stop listen view', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				test: {
 					users: [

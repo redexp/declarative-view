@@ -2,7 +2,7 @@ require('../setup');
 
 describe('each helper', function () {
 	it('should be empty', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: []
@@ -20,7 +20,7 @@ describe('each helper', function () {
 	});
 
 	it('should not be empty', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: {
@@ -40,7 +40,7 @@ describe('each helper', function () {
 	});
 
 	it('should handle item as simple value', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: [1, 'a', true]
@@ -65,7 +65,7 @@ describe('each helper', function () {
 	});
 
 	it('should handle item as object', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: [{name: 'value1'}, {name: 'value2'}, {name: 'value3'}]
@@ -90,7 +90,7 @@ describe('each helper', function () {
 	});
 
 	it('node option as selector', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li class="first"></li><li class="test"></li><li class="last"></li></ul>',
 			data: {
 				test: [1, 2]
@@ -113,7 +113,7 @@ describe('each helper', function () {
 	});
 
 	it('node option as html', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li class="first"></li></ul>',
 			data: {
 				test: [1, 2]
@@ -135,7 +135,7 @@ describe('each helper', function () {
 	});
 
 	it('view option as class', function () {
-		var Test = TemplateView.extend({
+		var Test = DeclarativeView.extend({
 			template: {
 				'@root': {
 					text: '=value'
@@ -143,7 +143,7 @@ describe('each helper', function () {
 			}
 		});
 
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: [1, 2]
@@ -164,7 +164,7 @@ describe('each helper', function () {
 	});
 
 	it('view option as function which returns class', function () {
-		var Test = TemplateView.extend({
+		var Test = DeclarativeView.extend({
 			template: {
 				'@root': {
 					text: '=value'
@@ -176,7 +176,7 @@ describe('each helper', function () {
 			return Test;
 		});
 
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: [1, 2]
@@ -205,14 +205,14 @@ describe('each helper', function () {
 		expect(cb).to.have.callCount(2);
 		expect(cb).to.be.calledOn(view);
 		expect(cb.getCall(0).args[0]).to.equal(1);
-		expect(cb.getCall(0).args[1]).to.be.instanceOf(TemplateView.$);
+		expect(cb.getCall(0).args[1]).to.be.instanceOf(DeclarativeView.$);
 		expect(cb.getCall(1).args[0]).to.equal(2);
-		expect(cb.getCall(1).args[1]).to.be.instanceOf(TemplateView.$);
+		expect(cb.getCall(1).args[1]).to.be.instanceOf(DeclarativeView.$);
 	});
 
 	it('view option as function which returns view', function () {
 		var cb = sinon.spy(function (item, node) {
-			return new TemplateView({
+			return new DeclarativeView({
 				node: node,
 				data: {
 					name: item
@@ -225,7 +225,7 @@ describe('each helper', function () {
 			});
 		});
 
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
 				test: [1, 2]
@@ -247,13 +247,13 @@ describe('each helper', function () {
 		expect(cb).to.have.callCount(2);
 		expect(cb).to.be.calledOn(view);
 		expect(cb.getCall(0).args[0]).to.equal(1);
-		expect(cb.getCall(0).args[1]).to.be.instanceOf(TemplateView.$);
+		expect(cb.getCall(0).args[1]).to.be.instanceOf(DeclarativeView.$);
 		expect(cb.getCall(1).args[0]).to.equal(2);
-		expect(cb.getCall(1).args[1]).to.be.instanceOf(TemplateView.$);
+		expect(cb.getCall(1).args[1]).to.be.instanceOf(DeclarativeView.$);
 	});
 
 	it('should listen add and remove events', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 
 			data: {
@@ -320,7 +320,7 @@ describe('each helper', function () {
 	});
 
 	it('should listen move event', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li class="first"></li><li class="test"></li></ul>',
 
 			data: {
@@ -361,7 +361,7 @@ describe('each helper', function () {
 	});
 
 	it('should listen sort event', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li class="first"></li><li class="test"></li></ul>',
 
 			data: {
@@ -410,7 +410,7 @@ describe('each helper', function () {
 		var remove = sinon.spy();
 		var move = sinon.spy();
 
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 
 			data: {
@@ -465,7 +465,7 @@ describe('each helper', function () {
 		var move = sinon.spy();
 		var sort = sinon.spy();
 
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 
 			data: {

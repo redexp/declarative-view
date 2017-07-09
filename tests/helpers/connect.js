@@ -2,7 +2,7 @@ require('../setup');
 
 describe('connect helper', function () {
 	it('should work', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				prop1: 'value1',
 				prop2: 'value2'

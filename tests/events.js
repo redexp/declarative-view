@@ -2,7 +2,7 @@ require('./setup');
 
 describe('Events', function () {
     it('on, off, trigger', function () {
-		var view = new TemplateView();
+		var view = new DeclarativeView();
 
 		var cb = sinon.spy();
 
@@ -55,7 +55,7 @@ describe('Events', function () {
 	});
 
 	it('should handle =prop, @prop, !event', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				prop: 'test'
 			}
@@ -104,7 +104,7 @@ describe('Events', function () {
 	});
 
 	it('should handle =sub.prop, @sub.prop', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				test: {
 					users: [
@@ -143,7 +143,7 @@ describe('Events', function () {
 	});
 
     it('listenOn, stopListening, listenOnce', function () {
-		var view = new TemplateView();
+		var view = new DeclarativeView();
 		var node = view.node;
 
 		var cb = sinon.spy();
@@ -193,7 +193,7 @@ describe('Events', function () {
 		node.trigger('c');
 		expect(cb).have.callCount(9);
 
-		var span = TemplateView.$('<span>');
+		var span = DeclarativeView.$('<span>');
 		node.append(span);
 
 		view.listenOn(node, 'click', 'span', cb);
@@ -211,7 +211,7 @@ describe('Events', function () {
 
 		view.stopListening();
 
-		var view2 = new TemplateView();
+		var view2 = new DeclarativeView();
 		view.listenOn(view2, 'test1 test2', cb);
 		view2.trigger('test1', 'a', 1, true);
 

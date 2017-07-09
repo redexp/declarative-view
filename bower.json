@@ -1,16 +1,15 @@
 {
-  "name": "template-view",
-  "main": "template-view.js",
+  "name": "declarative-view",
+  "main": "declarative-view.js",
   "version": "1.0.0",
-  "homepage": "https://github.com/redexp/template-view",
+  "homepage": "https://github.com/redexp/declarative-view",
   "authors": [
     "Sergii Kliuchnyk"
   ],
-  "description": "Template view",
+  "description": "View class based on jQuery with declarative configuration",
   "keywords": [
     "view",
     "jquery",
-    "template",
     "declarative"
   ],
   "license": "MIT",

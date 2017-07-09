@@ -2,7 +2,7 @@ require('./setup');
 
 describe('get, set', function () {
 	it('should work', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				prop: 'test'
 			}
@@ -35,7 +35,7 @@ describe('get, set', function () {
 	});
 
 	it('should handle array of props', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			data: {
 				test: {
 					users: [

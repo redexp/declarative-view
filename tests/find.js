@@ -2,7 +2,7 @@ require('./setup');
 
 describe('find', function () {
 	it('should replace @ui to node selector', function () {
-		var view = new TemplateView({
+		var view = new DeclarativeView({
 			node: '<div><div class="inner"><div class="test"><div class="asd"></div></div></div><div class="test"><div class="asd"></div></div></div>',
 
 			ui: {
