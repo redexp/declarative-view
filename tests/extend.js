@@ -1,3 +1,5 @@
+require('./setup');
+
 describe('extend', function () {
 	it('should work', function () {
 		var View = TemplateView.extend({

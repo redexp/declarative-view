@@ -1,3 +1,5 @@
+require('../setup');
+
 describe('html helper', function () {
 	it('should work', function () {
 		var objectEvent = sinon.spy(function (x, y) {

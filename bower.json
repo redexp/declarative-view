@@ -1,21 +1,23 @@
 {
   "name": "template-view",
   "main": "template-view.js",
+  "version": "1.0.0",
   "homepage": "https://github.com/redexp/template-view",
   "authors": [
     "Sergii Kliuchnyk"
   ],
   "description": "Template view",
   "keywords": [
-    "view"
+    "view",
+    "jquery",
+    "template",
+    "declarative"
   ],
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
-    "bower_components",
     "libs",
-    "test",
     "tests"
   ],
   "devDependencies": {
@@ -24,6 +26,10 @@
     "chai": "^4.0.1",
     "chai-jquery": "^2.0.1",
     "sinon": "^2.3.2",
-    "sinon-chai": "^2.10.0"
+    "sinon-chai": "^2.10.0",
+    "define-module-name": "^1.9.2"
+  },
+  "scripts": {
+    "install-sinon": "cd libs/sinon && npm install"
   }
 }

@@ -1,0 +1,36 @@
+{
+  "name": "template-view",
+  "version": "1.0.0",
+  "description": "View class based on jQuery with declarative configuration",
+  "keywords": ["view", "jquery", "template", "declarative"],
+  "main": "template-view.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "chai-jquery": "^2.0.0",
+    "gulp": "^3.9.1",
+    "gulp-replace": "^0.6.1",
+    "gulp-uglifyjs": "^0.6.2",
+    "jquery": "^3.2.1",
+    "jsdom": "^11.1.0",
+    "mocha": "^3.4.2",
+    "sinon": "^2.3.6",
+    "sinon-chai": "^2.11.0"
+  },
+  "scripts": {
+    "test": "mocha --ui bdd --recursive ./tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redexp/template-view.git"
+  },
+  "author": "Sergii Kliuchnyk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redexp/template-view/issues"
+  },
+  "homepage": "https://github.com/redexp/template-view#readme"
+}

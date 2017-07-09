@@ -1,3 +1,5 @@
+require('../setup');
+
 describe('attr helper', function () {
 	it('should work', function () {
 		var objectEvent1 = sinon.spy(function (x, y) {

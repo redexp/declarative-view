@@ -1,3 +1,5 @@
+require('../setup');
+
 describe('on, once helpers', function () {
 	it('on', function () {
 		var testCb = sinon.spy();

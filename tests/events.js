@@ -1,3 +1,5 @@
+require('./setup');
+
 describe('Events', function () {
     it('on, off, trigger', function () {
 		var view = new TemplateView();

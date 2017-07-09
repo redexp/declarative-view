@@ -1,3 +1,5 @@
+require('../setup');
+
 describe('each helper', function () {
 	it('should be empty', function () {
 		var view = new TemplateView({
@@ -21,12 +23,14 @@ describe('each helper', function () {
 		var view = new TemplateView({
 			node: '<ul><li></li></ul>',
 			data: {
-				test: [1, 'a', true]
+				test: {
+					values: [1, 'a', true]
+				}
 			},
 			template: {
 				'@root': {
 					each: {
-						prop: 'test'
+						prop: ['test', 'values']
 					}
 				}
 			}

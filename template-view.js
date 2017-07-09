@@ -1,8 +1,12 @@
 ;(function (factory) {
 	if (typeof define === 'function' && define.amd) {
 		define(['jquery'], factory);
-	} else {
-		window.TemplateView = factory(window.jQuery);
+	}
+	else if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
+		module.exports = factory(jQuery);
+	}
+	else {
+		window.TemplateView = factory(jQuery);
 	}
 })(function ($) {
 

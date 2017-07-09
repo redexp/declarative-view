@@ -1,3 +1,5 @@
+require('../setup');
+
 describe('connect helper', function () {
 	it('should work', function () {
 		var view = new TemplateView({

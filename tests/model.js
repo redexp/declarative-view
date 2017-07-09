@@ -1,3 +1,5 @@
+require('./setup');
+
 describe('model', function () {
 	it('object model', function () {
 		var view = new TemplateView({

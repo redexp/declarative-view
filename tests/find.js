@@ -1,3 +1,5 @@
+require('./setup');
+
 describe('find', function () {
 	it('should replace @ui to node selector', function () {
 		var view = new TemplateView({

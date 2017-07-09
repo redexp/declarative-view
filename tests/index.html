@@ -9,15 +9,23 @@
 <body>
 <div id="mocha"></div>
 
-<script src="../libs/mocha/mocha.js"></script>
-<script src="../libs/chai/chai.js"></script>
+<script src="../libs/define-module-name/define-module-name.min.js"></script>
+<script>define('jquery');</script>
 <script src="../libs/jquery/dist/jquery.min.js"></script>
+<script src="../libs/mocha/mocha.js"></script>
+<script>define('chai');</script>
+<script src="../libs/chai/chai.js"></script>
+<script>define('chai-jquery');</script>
 <script src="../libs/chai-jquery/chai-jquery.js"></script>
+<script>define('sinon');</script>
 <script src="../libs/sinon/pkg/sinon-no-sourcemaps.js"></script>
+<script>define('sinon-chai');</script>
 <script src="../libs/sinon-chai/lib/sinon-chai.js"></script>
+<script>define('template-view');</script>
 <script src="../template-view.js"></script>
 
-<script>mocha.setup('bdd');window.expect = chai.expect;</script>
+<script>mocha.setup('bdd');</script>
+<script src="setup.js"></script>
 <script src="events.js"></script>
 <script src="get-set.js"></script>
 <script src="ui.js"></script>

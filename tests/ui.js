@@ -1,3 +1,5 @@
+require('./setup');
+
 describe('ui', function () {
 	it('should handle ui names in selectors', function () {
 		var view = new TemplateView({
