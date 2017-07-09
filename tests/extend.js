@@ -78,4 +78,84 @@ describe('extend', function () {
 		expect(view.test).to.be.a('function');
 		expect(view.method).to.be.an('undefined');
 	});
+
+	it('ui, data, template as function', function () {
+		var View = DeclarativeView.extend({
+			ui: function () {
+				return {
+					ui1: 'div'
+				};
+			},
+
+			data: function () {
+				return {
+					data1: 'value1'
+				};
+			},
+
+			template: function () {
+				return {
+					'@root': {
+						text: '=data1'
+					}
+				};
+			}
+		});
+
+		var Test = View.extend({
+			ui: function () {
+				return {
+					ui2: 'div'
+				};
+			},
+
+			data: function () {
+				return {
+					data2: 'value2'
+				};
+			},
+
+			template: function () {
+				return {
+					'@root': {
+						html: '=data2'
+					}
+				};
+			}
+		});
+
+		var view = new Test({
+			ui: {
+				ui3: 'div'
+			},
+
+			data: {
+				data3: 'value3'
+			},
+
+			template: {
+				'@root': {
+					prop: {
+						'id': 'data3'
+					}
+				}
+			}
+		});
+
+		expect(view.ui).to.have.all.keys('root', 'ui1', 'ui2', 'ui3');
+		expect(view.data).to.eql({
+			data1: 'value1',
+			data2: 'value2',
+			data3: 'value3'
+		});
+		expect(view.template).to.eql({
+			'@root': {
+				text: '=data1',
+				html: '=data2',
+				prop: {
+					'id': 'data3'
+				}
+			}
+		});
+	});
 });
