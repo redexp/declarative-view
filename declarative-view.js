@@ -544,7 +544,15 @@
 		 * @returns {jQuery}
 		 */
 		find: function (selector) {
-			if (selector.indexOf('@') > -1) {
+			var aIndex = selector.indexOf('@');
+
+			if (aIndex === 0) {
+				var prop = selector.slice(1);
+
+				if (this.ui.hasOwnProperty(prop)) return this.ui[prop];
+			}
+
+			if (aIndex > -1) {
 				var view = this,
 					key = 'uiSelector' + view.id;
 
