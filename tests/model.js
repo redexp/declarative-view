@@ -152,4 +152,28 @@ describe('model', function () {
 		view.set(['test', 'users', 0, 'name'], 'test2');
 		expect(set).to.have.callCount(2);
 	});
+
+	it('should handle object of props', function () {
+		var view = new DeclarativeView({
+			data: {
+				test: {
+					prop1: 'value1',
+					prop2: 'value2'
+				}
+			}
+		});
+
+		var set = sinon.spy();
+		view.model('test').on('set', set);
+		view.model('test').set({
+			prop1: 'test1',
+			prop2: 'test2',
+			prop3: 'test3'
+		});
+		expect(set).to.have.callCount(3);
+		expect(set).to.be.always.calledOn(view.model('test'));
+		expect(set.getCall(0)).to.be.calledWith('prop1', 'test1', 'value1');
+		expect(set.getCall(1)).to.be.calledWith('prop2', 'test2', 'value2');
+		expect(set.getCall(2)).to.be.calledWith('prop3', 'test3', undefined);
+	});
 });

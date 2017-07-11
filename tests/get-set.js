@@ -51,4 +51,26 @@ describe('get, set', function () {
 		view.set(['test', 'users', 0, 'name'], 'test');
 		expect(view.get(['test', 'users', 0, 'name'])).to.equal('test');
 	});
+
+	it('should handle object of props', function () {
+		var view = new DeclarativeView({
+			data: {
+				prop1: 'value1',
+				prop2: 'value2'
+			}
+		});
+
+		var set = sinon.spy();
+		view.on('set', set);
+		view.set({
+			prop1: 'test1',
+			prop2: 'test2',
+			prop3: 'test3'
+		});
+		expect(set).to.have.callCount(3);
+		expect(set).to.be.always.calledOn(view);
+		expect(set.getCall(0)).to.be.calledWith('prop1', 'test1', 'value1');
+		expect(set.getCall(1)).to.be.calledWith('prop2', 'test2', 'value2');
+		expect(set.getCall(2)).to.be.calledWith('prop3', 'test3', undefined);
+	});
 });

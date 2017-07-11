@@ -460,10 +460,6 @@
 			root: ''
 		},
 
-		/**
-		 * @param {string} [prop]
-		 * @returns {*}
-		 */
 		get: function (prop) {
 			if (arguments.length === 0) {
 				return this.data;
@@ -481,12 +477,23 @@
 			return this.data[prop];
 		},
 
-		/**
-		 * @param {string} prop
-		 * @param {*} value
-		 * @returns {DeclarativeView}
-		 */
 		set: function (prop, value) {
+			if (prop instanceof Array) {
+				var model = modelByProp(this, prop);
+				model.set(lastItem(prop), value);
+				return this;
+			}
+
+			if (typeof prop === 'object') {
+				for (var name in prop) {
+					if (!prop.hasOwnProperty(name)) continue;
+
+					this.set(name, prop[name]);
+				}
+
+				return this;
+			}
+
 			var oldValue = this.get(prop);
 
 			if (oldValue === value) return this;
@@ -495,12 +502,6 @@
 
 			if (sourceIndex !== -1) {
 				this.wrappers.targets[sourceIndex].clear();
-			}
-
-			if (prop instanceof Array) {
-				var model = modelByProp(this, prop);
-				model.set(lastItem(prop), value);
-				return this;
 			}
 
 			this.data[prop] = value;
@@ -539,10 +540,6 @@
 			return new Wrapper(this, path, item);
 		},
 
-		/**
-		 * @param {string} selector
-		 * @returns {jQuery}
-		 */
 		find: function (selector) {
 			var aIndex = selector.indexOf('@');
 
@@ -1025,6 +1022,16 @@
 		},
 
 		set: function (prop, value) {
+			if (typeof prop === 'object') {
+				for (var name in prop) {
+					if (!prop.hasOwnProperty(name)) continue;
+
+					this.set(name, prop[name]);
+				}
+
+				return this;
+			}
+
 			var oldValue = this.get(prop);
 
 			if (oldValue === value) return this;
@@ -1390,10 +1397,6 @@
 		return arr[arr.length - 1];
 	}
 
-	/**
-	 * @param {string|Array} events
-	 * @returns {Array<string>}
-	 */
 	function splitEvents(events) {
 	    return typeof events === 'object' ? events : events.indexOf(' ') > -1 ? events.split(/\s+/) : [events];
 	}
