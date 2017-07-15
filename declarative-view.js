@@ -1417,6 +1417,10 @@
 		var selector = view.ui[name];
 
 		if (typeof selector === 'string') {
+			if (selector.charAt(0) === '<') {
+				return view.ui[name] = $(selector);
+			}
+
 			var key = 'uiSelector' + view.id;
 
 			selector = selector.replace(/@(\w+)/g, function (x, name) {
