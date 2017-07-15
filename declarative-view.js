@@ -782,7 +782,7 @@
 		var root = view.find(selector),
 			list = view.model(options.prop),
 			views = new ViewsList([]),
-			tplSelector = options.node || '> *';
+			tplSelector = options.node === false ? [] : options.node || '> *';
 
 		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
 		tpl.detach();

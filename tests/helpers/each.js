@@ -134,6 +134,33 @@ describe('each helper', function () {
 		expect(view.node.children().eq(2)).to.have.class('test');
 	});
 
+	it('node option as false', function () {
+		var view = new DeclarativeView({
+			node: '<ul><li class="first"></li></ul>',
+			data: {
+				test: [1, 2]
+			},
+			template: {
+				'@root': {
+					each: {
+						prop: 'test',
+						view: function () {
+							return new DeclarativeView({
+								node: '<li class="test">'
+							});
+						},
+						node: false
+					}
+				}
+			}
+		});
+
+		expect(view.node.children().length).to.equal(3);
+		expect(view.node.children().eq(0)).to.have.class('first');
+		expect(view.node.children().eq(1)).to.have.class('test');
+		expect(view.node.children().eq(2)).to.have.class('test');
+	});
+
 	it('view option as class', function () {
 		var Test = DeclarativeView.extend({
 			template: {
