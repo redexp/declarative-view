@@ -1129,22 +1129,30 @@
 				items = [items];
 			}
 
-			var arr = this.context;
+			var arr = this.context,
+				len = this.length();
 
-			if (typeof index === "undefined") {
-				index = arr.length;
+			if (len === 0) {
+				index = 0;
+			}
+			else if (index > len || typeof index === "undefined") {
+				index = len;
+			}
+			else if (index < 0) {
+				index = getRealIndex(index, len);
 			}
 
-			for (var i = 0, len = items.length; i < len; i++) {
+			for (var i = 0, length = items.length; i < length; i++) {
 				var item = items[i],
 					itemIndex = index + i;
 
-				if (arr.length <= itemIndex) {
+				if (itemIndex >= this.length()) {
 					arr.push(item);
 				}
 				else {
 					arr.splice(itemIndex, 0, item);
 				}
+
 				this.trigger('add', item, itemIndex);
 			}
 
@@ -1166,25 +1174,30 @@
 		},
 
 		removeAt: function (index) {
-			if (index instanceof Array) {
-				index = index.length === 1 ? index : [].concat(index).sort(function (a, b) {
-					return b - a;
-				});
+			var len = this.length();
 
-				for (var i = 0, len = index.length; i < len; i++) {
-					this.removeAt(index[i]);
+			if (len === 0) return this;
+
+			if (index instanceof Array) {
+				var indexes = sortIndexes(index, len);
+
+				for (var i = 0, length = indexes.length; i < length; i++) {
+					this.removeAt(indexes[i]);
 				}
 
 				return this;
 			}
+			else {
+				index = getRealIndex(index, len);
+			}
+
+			if (index === -1) return this;
 
 			var arr = this.context;
 
-			if (!arr.hasOwnProperty(index)) return this;
+			var item = this.get(index);
 
-			var item = arr[index];
-
-			if (index + 1 === arr.length) {
+			if (index + 1 === len) {
 				arr.pop();
 			}
 			else if (index === 0) {
@@ -1222,6 +1235,22 @@
 		},
 
 		moveFrom: function (oldIndex, newIndex) {
+			var len = this.length();
+
+			if (len < 2 || oldIndex >= len) return this;
+
+			if (oldIndex < 0) {
+				return this.moveFrom(len + oldIndex, newIndex);
+			}
+
+			if (newIndex > len) {
+				newIndex = len;
+			}
+
+			if (newIndex < 0) {
+				return this.moveFrom(oldIndex, len + newIndex);
+			}
+
 			if (oldIndex === newIndex) return this;
 
 			var item = this.get(oldIndex);
@@ -1450,6 +1479,26 @@
 			model = model.model(prop[i]);
 		}
 		return model;
+	}
+
+	function getRealIndex(index, length) {
+		if (length === 0 || index >= length) return -1;
+
+		if (index < 0) {
+			return getRealIndex(length + index, length);
+		}
+
+		return index;
+	}
+
+	function sortIndexes(indexes, length) {
+		indexes = [].concat(indexes);
+
+		for (var i = 0, len = indexes.length; i < len; i++) {
+			indexes[i] = getRealIndex(indexes[i], length);
+		}
+
+		return indexes;
 	}
 
 	//endregion

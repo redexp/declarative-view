@@ -176,4 +176,44 @@ describe('model', function () {
 		expect(set.getCall(1)).to.be.calledWith('prop2', 'test2', 'value2');
 		expect(set.getCall(2)).to.be.calledWith('prop3', 'test3', undefined);
 	});
+
+	it('should handle indexes more than length and less zero', function () {
+		var view = new DeclarativeView({
+			data: {
+				users: [
+					{name: 'value1'}
+				]
+			}
+		});
+
+		var users = view.model('users');
+		var add = sinon.spy();
+		var remove = sinon.spy();
+		var move = sinon.spy();
+		users.on('add', add);
+		users.on('remove', remove);
+		users.on('move', move);
+
+		users.add({name: 'value2'}, 10);
+		expect(view.data.users).to.eql([{name: 'value1'}, {name: 'value2'}]);
+		expect(add).to.be.calledWith({name: 'value2'}, 1);
+		users.add([{name: 'value3'}, {name: 'value4'}], -1);
+		expect(view.data.users).to.eql([{name: 'value1'}, {name: 'value3'}, {name: 'value4'}, {name: 'value2'}]);
+		expect(add).to.be.calledWith({name: 'value4'}, 2);
+		users.removeAt(10);
+		expect(view.data.users).to.eql([{name: 'value1'}, {name: 'value3'}, {name: 'value4'}, {name: 'value2'}]);
+		expect(remove).to.have.callCount(0);
+		users.removeAt(-1);
+		expect(view.data.users).to.eql([{name: 'value1'}, {name: 'value3'}, {name: 'value4'}]);
+		expect(remove).to.be.calledWith({name: 'value2'}, 3);
+		users.moveFrom(10, 0);
+		expect(view.data.users).to.eql([{name: 'value1'}, {name: 'value3'}, {name: 'value4'}]);
+		expect(move).to.have.callCount(0);
+		users.moveFrom(-1, 0);
+		expect(view.data.users).to.eql([{name: 'value4'}, {name: 'value1'}, {name: 'value3'}]);
+		expect(move).to.be.calledWith({name: 'value4'}, 0, 2);
+		users.moveFrom(-2, -1);
+		expect(view.data.users).to.eql([{name: 'value4'}, {name: 'value3'}, {name: 'value1'}]);
+		expect(move).to.be.calledWith({name: 'value1'}, 2, 1);
+	});
 });
