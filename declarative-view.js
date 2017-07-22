@@ -1239,16 +1239,13 @@
 
 			if (len < 2 || oldIndex >= len) return this;
 
-			if (oldIndex < 0) {
-				return this.moveFrom(len + oldIndex, newIndex);
-			}
+			oldIndex = getRealIndex(oldIndex, len);
 
-			if (newIndex > len) {
+			if (newIndex >= len) {
 				newIndex = len;
 			}
-
-			if (newIndex < 0) {
-				return this.moveFrom(oldIndex, len + newIndex);
+			else {
+				newIndex = getRealIndex(newIndex, len);
 			}
 
 			if (oldIndex === newIndex) return this;
