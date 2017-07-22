@@ -215,5 +215,8 @@ describe('model', function () {
 		users.moveFrom(-2, -1);
 		expect(view.data.users).to.eql([{name: 'value4'}, {name: 'value3'}, {name: 'value1'}]);
 		expect(move).to.be.calledWith({name: 'value1'}, 2, 1);
+		users.moveFrom(0, 10);
+		expect(view.data.users).to.eql([{name: 'value3'}, {name: 'value1'}, {name: 'value4'}]);
+		expect(move).to.be.calledWith({name: 'value4'}, 2, 0);
 	});
 });

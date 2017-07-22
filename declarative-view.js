@@ -1242,7 +1242,7 @@
 			oldIndex = getRealIndex(oldIndex, len);
 
 			if (newIndex >= len) {
-				newIndex = len;
+				newIndex = len - 1;
 			}
 			else {
 				newIndex = getRealIndex(newIndex, len);
