@@ -811,7 +811,6 @@
 				}
 				else {
 					itemView = res;
-					itemView.parent = itemView.parent || view;
 				}
 			}
 			else {
@@ -832,7 +831,8 @@
 				});
 			}
 
-			itemView.context = item;
+			itemView.parent = itemView.parent || view;
+			itemView.context = itemView.context || item;
 
 			views.add(itemView, index);
 
