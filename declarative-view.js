@@ -1110,16 +1110,21 @@
 		ObjectWrapper.apply(this, arguments);
 	}
 
+	Object.getOwnPropertyNames(Array.prototype).forEach(function (name) {
+		if (ArrayWrapper.prototype[name] || typeof Array.prototype[name] !== 'function') return;
+
+		ArrayWrapper.prototype[name] = function () {
+			return Array.prototype[name].apply(this.context, arguments);
+		};
+	});
+
+	if (!ArrayWrapper.prototype.find) {
+		ArrayWrapper.prototype.find = function (cb) {
+			return findItem(this.context, cb);
+		};
+	}
+
 	extendClass(ArrayWrapper, ObjectWrapper, {
-		indexOf: function (item) {
-			return this.context.indexOf(item);
-		},
-
-		forEach: function (cb) {
-			this.context.forEach(cb);
-			return this;
-		},
-
 		length: function () {
 			return this.context.length;
 		},
@@ -1303,6 +1308,8 @@
 			Child = protoProps.hasOwnProperty('constructor') ? protoProps.constructor : function () { Parent.apply(this, arguments); };
 		}
 
+		var oldProto = Child.prototype;
+
 		if (Object.create) {
 			Child.prototype = Object.create(Parent.prototype);
 		}
@@ -1311,6 +1318,8 @@
 			Extend.prototype = protoProps;
 			Child.prototype = new Extend();
 		}
+
+		extend(Child.prototype, oldProto);
 
 		Child.prototype.constructor = Child;
 
