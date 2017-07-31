@@ -1266,6 +1266,12 @@
 			this.context.sort(callback);
 			this.trigger('sort');
 			return this;
+		},
+
+		reset: function (items) {
+			this.removeAll();
+			this.add(items);
+			return this;
 		}
 	});
 
