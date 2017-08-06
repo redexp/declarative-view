@@ -531,4 +531,33 @@ describe('each helper', function () {
 		expect(move).to.be.always.calledOn(view);
 		expect(sort).to.be.always.calledOn(view);
 	});
+
+	it('viewProp option', function () {
+		var view = new DeclarativeView({
+			node: '<ul><li></li></ul>',
+			data: {
+				users: [
+					{name: 'test1'},
+					{name: 'test2'}
+				]
+			},
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						viewProp: 'user',
+						template: {
+							'@root': {
+								text: '=user.name'
+							}
+						}
+					}
+				}
+			}
+		});
+
+		expect(view.model('users').views['@root'].get(0).get('user')).to.equal(view.get('users')[0]);
+		expect(view.views['@root'].get(0).get('user')).to.equal(view.get('users')[0]);
+		expect(view.find('> li').first()).to.have.text('test1');
+	});
 });

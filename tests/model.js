@@ -219,4 +219,20 @@ describe('model', function () {
 		expect(view.data.users).to.eql([{name: 'value3'}, {name: 'value1'}, {name: 'value4'}]);
 		expect(move).to.be.calledWith({name: 'value4'}, 2, 0);
 	});
+
+	it('should return model of object', function () {
+		var view = new DeclarativeView({
+			data: {
+				test: {
+					user: {
+						name: 'value'
+					}
+				}
+			}
+		});
+
+		var model = view.model('test').model('user');
+		expect(view.modelOf(view.data.test.user)).to.equal(model);
+		expect(view.modelOf({})).to.be.undefined;
+	});
 });

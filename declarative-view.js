@@ -523,14 +523,19 @@
 				return model;
 			}
 
-			var source = this.get(prop),
-				index = this.wrappers.sources.indexOf(source);
+			var source = this.get(prop);
+			var index = this.wrappers.sources.indexOf(source);
 
 			if (index === -1) {
 				index = this.wrappers.sources.push(source) - 1;
 				this.wrappers.targets.push(this.wrapper(source, [prop]));
 			}
 
+			return this.wrappers.targets[index];
+		},
+
+		modelOf: function (source) {
+			var index = this.wrappers.sources.indexOf(source);
 			return this.wrappers.targets[index];
 		},
 
@@ -788,7 +793,8 @@
 		tpl.detach();
 
 		list.views = list.views || {};
-		list.views[selector] = views;
+		view.views = view.views || {};
+		list.views[selector] = view.views[selector] = views;
 
 		view.listenOn(list, 'add', add);
 		view.listenOn(list, 'remove', remove);
@@ -817,17 +823,24 @@
 				ViewClass = DeclarativeView;
 			}
 
-			if (ViewClass && options.template) {
-				ViewClass = ViewClass.extend({
-					template: options.template
-				});
-			}
-
 			if (ViewClass) {
+				var data = {};
+
+				if (options.viewProp) {
+					data[options.viewProp] = item;
+				}
+				else if (typeof item === 'object' && item !== null) {
+					extend(data, item);
+				}
+				else {
+					data.value = item;
+				}
+
 				itemView = new ViewClass({
 					node: tpl.clone(),
 					parent: view,
-					data: typeof item !== 'object' ? {value: item} : extend({}, item)
+					data: data,
+					template: options.template
 				});
 			}
 
