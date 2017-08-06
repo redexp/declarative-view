@@ -523,12 +523,14 @@
 				return model;
 			}
 
-			var source = this.get(prop);
-			var index = this.wrappers.sources.indexOf(source);
+			var source = this.get(prop),
+				index = this.wrappers.sources.indexOf(source);
 
 			if (index === -1) {
+				var wrapper = this.wrapper(source, [prop]);
+				if (!wrapper) return;
+				this.wrappers.targets.push(wrapper);
 				index = this.wrappers.sources.push(source) - 1;
-				this.wrappers.targets.push(this.wrapper(source, [prop]));
 			}
 
 			return this.wrappers.targets[index];
@@ -540,6 +542,8 @@
 		},
 
 		wrapper: function (item, path) {
+			if (!item || typeof item !== 'object') return;
+
 			var Wrapper = item instanceof Array ? ViewArrayWrapper : ViewObjectWrapper;
 
 			return new Wrapper(this, path, item);
@@ -1063,8 +1067,10 @@
 				index = this.view.wrappers.sources.indexOf(source);
 
 			if (index === -1) {
+				var wrapper = this.view.wrapper(source, this.path.concat(prop));
+				if (!wrapper) return;
+				this.view.wrappers.targets.push(wrapper);
 				index = this.view.wrappers.sources.push(source) - 1;
-				this.view.wrappers.targets.push(this.view.wrapper(source, this.path.concat(prop)));
 			}
 
 			return this.view.wrappers.targets[index];
@@ -1301,6 +1307,10 @@
 	}
 
 	extendClass(ViewArrayWrapper, ArrayWrapper, ModelMixin);
+
+	ViewArrayWrapper.prototype.modelOf = function (source) {
+		return this.model(this.indexOf(source));
+	};
 
 	function ViewsList() {
 		ArrayWrapper.apply(this, arguments);
