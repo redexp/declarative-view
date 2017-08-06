@@ -413,18 +413,28 @@
 			this.parent = options.parent;
 		}
 
-		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
-		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
-		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
+		if (options.wrappers) {
+			var wrappers = options.wrappers;
 
+			if (_DEV_) {
+				if (wrappers.sources.length !== wrappers.targets.length) throw new Error('Number of sources and targets should be equal');
+			}
+
+			this.wrappers.sources = [].concat(wrappers.sources);
+			this.wrappers.targets = [].concat(wrappers.targets);
+		}
+
+		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
 		if (options.data) {
 			extend(this.data, options.data);
 		}
 
+		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
 		if (options.ui) {
 			extend(this.ui, options.ui);
 		}
 
+		this.template = extendPrototypeProp({object: this, prop: 'template', deep: true});
 		if (options.template) {
 			extendDeep(this.template, options.template);
 		}
@@ -828,10 +838,18 @@
 			}
 
 			if (ViewClass) {
-				var data = {};
+				var data = {},
+					wrappers = null;
 
 				if (options.viewProp) {
 					data[options.viewProp] = item;
+
+					if (typeof item === 'object' && item !== null) {
+						wrappers = {
+							sources: [item],
+							targets: [list.modelOf(item)]
+						};
+					}
 				}
 				else if (typeof item === 'object' && item !== null) {
 					extend(data, item);
@@ -844,6 +862,7 @@
 					node: tpl.clone(),
 					parent: view,
 					data: data,
+					wrappers: wrappers,
 					template: options.template
 				});
 			}

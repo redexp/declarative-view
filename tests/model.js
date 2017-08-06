@@ -252,4 +252,31 @@ describe('model', function () {
 		expect(users.modelOf(view.data.test.users[0])).to.equal(users.model(0));
 		expect(users.modelOf({})).to.be.undefined;
 	});
+
+	it('should return model of object in array wrapper', function () {
+		var users = [
+			{name: 'value1'},
+			{name: 'value2'}
+		];
+
+		var wrappers = [
+			{test1: true},
+			{test2: true}
+		];
+
+		var view = new DeclarativeView({
+			data: {
+				test: {
+					users: users
+				}
+			},
+
+			wrappers: {
+				sources: users,
+				targets: wrappers
+			}
+		});
+
+		expect(view.model('test').model('users').model(0)).to.equal(wrappers[0]);
+	});
 });
