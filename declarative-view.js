@@ -1380,29 +1380,37 @@
 		return Child;
 	}
 
-	function extend(target, source) {
-	    for (var name in source) {
-	    	if (!source.hasOwnProperty(name)) continue;
+	function extend(target) {
+		for (var i = 1, len = arguments.length; i < len; i++) {
+			var source = arguments[i];
 
-	    	target[name] = source[name];
+			for (var name in source) {
+				if (!source.hasOwnProperty(name)) continue;
+
+				target[name] = source[name];
+			}
 		}
 
 		return target;
 	}
 
-	function extendDeep(target, source) {
-		for (var name in source) {
-			if (!source.hasOwnProperty(name)) continue;
+	function extendDeep(target) {
+		for (var i = 1, len = arguments.length; i < len; i++) {
+			var source = arguments[i];
 
-			target[name] = (
-				target[name] &&
-				source[name] &&
-				typeof target[name] === 'object' &&
-				typeof source[name] === 'object'
-			) ?
-				extendDeep(target[name], source[name]) :
-				source[name]
-			;
+			for (var name in source) {
+				if (!source.hasOwnProperty(name)) continue;
+
+				target[name] = (
+					target[name] &&
+					source[name] &&
+					typeof target[name] === 'object' &&
+					typeof source[name] === 'object'
+				) ?
+					extendDeep(target[name], source[name]) :
+					source[name]
+				;
+			}
 		}
 
 		return target;
