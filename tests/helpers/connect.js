@@ -30,4 +30,28 @@ describe('connect helper', function () {
 		expect(view.get('prop1')).to.equal('value4');
 		expect(view.get('prop2')).to.equal('value5');
 	});
+
+	it('should handle path', function () {
+		var view = new DeclarativeView({
+			data: {
+				test: {
+					user: {
+						name: 'value'
+					}
+				}
+			},
+
+			template: {
+				'@root': {
+					connect: {
+						'id': 'test.user.name'
+					}
+				}
+			}
+		});
+
+		expect(view.node).to.have.prop('id', 'value');
+		view.node.prop('id', 'value2').change();
+		expect(view.data.test.user.name).to.equal('value2');
+	});
 });

@@ -781,8 +781,14 @@
 				nodeProp = nodeProp[0];
 			}
 
+			var path = viewProp;
+
+			if (viewProp.indexOf('.') > -1) {
+				path = viewProp.split('.');
+			}
+
 			view.listenOn(node, event, function () {
-				view.set(viewProp, node.prop(nodeProp));
+				view.set(path, node.prop(nodeProp));
 			});
 
 			view.on('@' + viewProp, function (value) {
