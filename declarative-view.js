@@ -601,6 +601,10 @@
 		on: onHelper,
 		once: onceHelper,
 		connect: connectHelper,
+		visible: visibleHelper,
+		show: visibleHelper,
+		hidden: hiddenHelper,
+		hide: hiddenHelper,
 		each: eachHelper
 	};
 
@@ -797,6 +801,30 @@
 				node.prop(nodeProp, value);
 			});
 		}
+	}
+
+	function visibleHelper(view, selector, options) {
+		convertHelperOptionsKeysToFirstArgument({
+			view: view,
+			node: view.find(selector),
+			method: 'css',
+			options: {'display': options},
+			wrapper: function (v) {
+				return v ? '' : 'none';
+			}
+		});
+	}
+
+	function hiddenHelper(view, selector, options) {
+		convertHelperOptionsKeysToFirstArgument({
+			view: view,
+			node: view.find(selector),
+			method: 'css',
+			options: {'display': options},
+			wrapper: function (v) {
+				return v ? 'none': '';
+			}
+		});
 	}
 
 	//endregion
@@ -998,6 +1026,10 @@
 			if (node.length === 0) {
 				console.warn('Empty result by selector "' + node.selector + '" in ' + params.view.constructor.name);
 			}
+		}
+
+		if (wrapper && typeof value !== 'function') {
+			value = wrapper(value);
 		}
 
 		if (typeof value === 'function') {
