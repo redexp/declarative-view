@@ -279,4 +279,27 @@ describe('model', function () {
 
 		expect(view.model('test').model('users').model(0)).to.equal(wrappers[0]);
 	});
+
+	it('should listen to change of array', function () {
+		var view = new DeclarativeView({
+			data: {
+				test: {
+					users: []
+				}
+			}
+		});
+
+		var change = sinon.spy();
+		view.on('@test.users', change);
+		expect(change).to.be.calledWith(view.data.test.users);
+		view.model('test').model('users').add('test1');
+		expect(change).to.be.calledWith(view.data.test.users, 'add', 'test1', 0);
+		view.model('test').model('users').remove('test1');
+		expect(change).to.be.calledWith(view.data.test.users, 'remove', 'test1', 0);
+		view.model('test').model('users').add(['test1', 'test2', 'test3', 'test4']);
+		view.model('test').model('users').move('test4', 1);
+		expect(change).to.be.calledWith(view.data.test.users, 'move', 'test4', 1, 3);
+		view.model('test').model('users').sort();
+		expect(change).to.be.calledWith(view.data.test.users, 'sort');
+	});
 });

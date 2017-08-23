@@ -85,7 +85,7 @@
 						var args = [arg];
 
 						if (arguments.length > 0) {
-							args = args.concat(slice(arguments, prop && !not ? 1 : 0));
+							args = args.concat(slice(arguments, not || (prop && arguments[0] !== arg) ? 0 : 1));
 						}
 
 						callback.apply(context || view, args);
@@ -97,6 +97,15 @@
 				}
 
 				if (eq) return;
+
+				if (prop instanceof Array) {
+					var model = modelByProp(view, prop);
+					event = model instanceof ArrayWrapper ? 'change' : 'set/' + lastItem(prop);
+
+					view.listenOn(model, event, wrapper);
+
+					return;
+				}
 
 				var callbacks = view.events[event];
 
@@ -110,10 +119,6 @@
 					callback: callback,
 					wrapper: wrapper
 				});
-
-				if (prop instanceof Array) {
-					view.listenOn(modelByProp(view, prop), 'set/' + lastItem(prop), wrapper);
-				}
 			});
 
 			return this;
@@ -1235,6 +1240,7 @@
 				}
 
 				this.trigger('add', item, itemIndex);
+				this.trigger('change', 'add', item, itemIndex);
 			}
 
 			return this;
@@ -1289,6 +1295,7 @@
 			}
 
 			this.trigger('remove', item, index);
+			this.trigger('change', 'remove', item, index);
 
 			return this;
 		},
@@ -1335,12 +1342,14 @@
 			this.context.splice(oldIndex, 1);
 			this.context.splice(newIndex, 0, item);
 			this.trigger('move', item, newIndex, oldIndex);
+			this.trigger('change', 'move', item, newIndex, oldIndex);
 			return this;
 		},
 
 		sort: function (callback) {
 			this.context.sort(callback);
 			this.trigger('sort');
+			this.trigger('change', 'sort');
 			return this;
 		},
 
@@ -1578,6 +1587,13 @@
 		for (var i = 0, len = prop.length - 1; i < len; i++) {
 			model = model.model(prop[i]);
 		}
+
+		var last = lastItem(prop);
+
+		if (typeof model.get(last) === 'object') {
+			model = model.model(last);
+		}
+
 		return model;
 	}
 
