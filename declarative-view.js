@@ -62,16 +62,13 @@
 
 				if (event.charAt(0) === '=') {
 					eq = true;
-					prop = event.slice(1);
 				}
 				else if (event.charAt(0) === '@') {
 					a = true;
-					prop = event.slice(1);
-					event = 'set/' + prop;
 				}
 
-				if ((eq || a) && prop.indexOf('.') > -1) {
-					prop = prop.split('.');
+				if (eq || a) {
+					prop = event.slice(1).split('.');
 				}
 
 				if (not || prop) {
@@ -98,13 +95,17 @@
 
 				if (eq) return;
 
-				if (prop instanceof Array) {
+				if (a) {
 					var model = modelByProp(view, prop);
-					event = model instanceof ArrayWrapper ? 'change' : 'set/' + lastItem(prop);
 
-					view.listenOn(model, event, wrapper);
-
-					return;
+					if (view !== model) {
+						event = model instanceof ArrayWrapper ? 'change' : 'set/' + lastItem(prop);
+						view.listenOn(model, event, wrapper);
+						return;
+					}
+					else {
+						event = 'set/' + prop.join('.');
+					}
 				}
 
 				var callbacks = view.events[event];

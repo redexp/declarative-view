@@ -285,7 +285,8 @@ describe('model', function () {
 			data: {
 				test: {
 					users: []
-				}
+				},
+				list: []
 			}
 		});
 
@@ -301,5 +302,18 @@ describe('model', function () {
 		expect(change).to.be.calledWith(view.data.test.users, 'move', 'test4', 1, 3);
 		view.model('test').model('users').sort();
 		expect(change).to.be.calledWith(view.data.test.users, 'sort');
+
+		change = sinon.spy();
+		view.on('@list', change);
+		expect(change).to.be.calledWith(view.data.list);
+		view.model('list').add('test1');
+		expect(change).to.be.calledWith(view.data.list, 'add', 'test1', 0);
+		view.model('list').remove('test1');
+		expect(change).to.be.calledWith(view.data.list, 'remove', 'test1', 0);
+		view.model('list').add(['test1', 'test2', 'test3', 'test4']);
+		view.model('list').move('test4', 1);
+		expect(change).to.be.calledWith(view.data.list, 'move', 'test4', 1, 3);
+		view.model('list').sort();
+		expect(change).to.be.calledWith(view.data.list, 'sort');
 	});
 });
