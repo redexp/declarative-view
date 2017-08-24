@@ -316,4 +316,66 @@ describe('model', function () {
 		view.model('list').sort();
 		expect(change).to.be.calledWith(view.data.list, 'sort');
 	});
+
+	it('should deep assign props', function () {
+		var view = new DeclarativeView({
+			data: {
+				user: {
+					name: '',
+					list: [1, 2, 3],
+					test: {
+						prop: 'value'
+					}
+				}
+			}
+		});
+
+		var setUser = sinon.spy();
+		var removeList = sinon.spy();
+		var addList = sinon.spy();
+		var setTest = sinon.spy();
+		view.model('user').on('set', setUser);
+		view.model('user').model('list').on('remove', removeList);
+		view.model('user').model('list').on('add', addList);
+		view.model('user').model('test').on('set', setTest);
+
+		var data = {
+			name: 'test',
+			list: [4, 5, 6],
+			test: {
+				prop: 'value1',
+				prop2: 'value2'
+			}
+		};
+		view.model('user').assign(data);
+		expect(view.data).to.eql({user: data});
+		expect(setUser).to.have.callCount(1);
+		expect(setUser).to.be.calledWith('name', 'test', '');
+		expect(removeList).to.have.callCount(3);
+		expect(removeList).to.be.calledWith(3, 2);
+		expect(addList).to.have.callCount(3);
+		expect(addList).to.be.calledWith(6, 2);
+		expect(setTest).to.have.callCount(2);
+		expect(setTest.getCall(0)).to.be.calledWith('prop', 'value1', 'value');
+		expect(setTest.getCall(1)).to.be.calledWith('prop2', 'value2', undefined);
+
+		data = {
+			user: {
+				name: 'test2',
+				list: [],
+				test: {
+					prop: 'value2',
+					prop2: 'value2'
+				}
+			}
+		};
+		view.assign(data);
+		expect(view.data).to.eql(data);
+		expect(setUser).to.have.callCount(2);
+		expect(setUser).to.be.calledWith('name', 'test2', 'test');
+		expect(removeList).to.have.callCount(6);
+		expect(removeList).to.be.calledWith(4, 0);
+		expect(setTest).to.have.callCount(3);
+		expect(setTest).to.be.calledWith('prop', 'value2', 'value1');
+	});
 });

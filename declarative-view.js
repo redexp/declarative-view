@@ -557,6 +557,21 @@
 			return this.wrappers.targets[index];
 		},
 
+		assign: function (props) {
+			for (var prop in props) {
+				if (!props.hasOwnProperty(prop)) continue;
+
+				var value = props[prop];
+
+				if (value && typeof value === 'object') {
+					this.model(prop).assign(value);
+				}
+				else {
+					this.set(prop, value);
+				}
+			}
+		},
+
 		wrapper: function (item, path) {
 			if (!item || typeof item !== 'object') return;
 
@@ -1084,6 +1099,55 @@
 
 	//endregion
 
+	//region ====================== Model =========================================
+
+	var ModelMixin = {
+		model: function (prop) {
+			var source = this.get(prop),
+				index = this.view.wrappers.sources.indexOf(source);
+
+			if (index === -1) {
+				var wrapper = this.view.wrapper(source, this.path.concat(prop));
+				if (!wrapper) return;
+				this.view.wrappers.targets.push(wrapper);
+				index = this.view.wrappers.sources.push(source) - 1;
+			}
+
+			return this.view.wrappers.targets[index];
+		},
+
+		assign: DeclarativeView.prototype.assign,
+
+		clear: function () {
+			var index = this.view.wrappers.sources.indexOf(this.context);
+
+			if (index !== -1) {
+				var target = this.view.wrappers.targets[index];
+
+				this.view.stopListening(target);
+
+				this.view.wrappers.sources.splice(index, 1);
+				this.view.wrappers.targets.splice(index, 1);
+			}
+
+			var props = this.get();
+
+			for (var prop in props) {
+				if (!props.hasOwnProperty(prop)) continue;
+
+				index = this.view.wrappers.sources.indexOf(props[prop]);
+
+				if (index !== -1) {
+					this.view.wrappers.targets[index].clear();
+				}
+			}
+
+			this.view = this.path = this.context = null;
+		}
+	};
+
+	//endregion
+
 	//region ====================== ObjectWrapper =================================
 
 	function ObjectWrapper(context) {
@@ -1123,49 +1187,6 @@
 			return this;
 		}
 	});
-
-	var ModelMixin = {
-		model: function (prop) {
-			var source = this.get(prop),
-				index = this.view.wrappers.sources.indexOf(source);
-
-			if (index === -1) {
-				var wrapper = this.view.wrapper(source, this.path.concat(prop));
-				if (!wrapper) return;
-				this.view.wrappers.targets.push(wrapper);
-				index = this.view.wrappers.sources.push(source) - 1;
-			}
-
-			return this.view.wrappers.targets[index];
-		},
-
-		clear: function () {
-			var index = this.view.wrappers.sources.indexOf(this.context);
-
-			if (index !== -1) {
-				var target = this.view.wrappers.targets[index];
-
-				this.view.stopListening(target);
-
-				this.view.wrappers.sources.splice(index, 1);
-				this.view.wrappers.targets.splice(index, 1);
-			}
-
-			var props = this.get();
-
-			for (var prop in props) {
-				if (!props.hasOwnProperty(prop)) continue;
-
-				index = this.view.wrappers.sources.indexOf(props[prop]);
-
-				if (index !== -1) {
-					this.view.wrappers.targets[index].clear();
-				}
-			}
-
-			this.view = this.path = this.context = null;
-		}
-	};
 
 	function ViewObjectWrapper(view, path, context) {
 		ObjectWrapper.call(this, context);
@@ -1373,11 +1394,15 @@
 		});
 	}
 
-	extendClass(ViewArrayWrapper, ArrayWrapper, ModelMixin);
+	extendClass(ViewArrayWrapper, ArrayWrapper, extend({}, ModelMixin, {
+		modelOf: function (source) {
+			return this.model(this.indexOf(source));
+		},
 
-	ViewArrayWrapper.prototype.modelOf = function (source) {
-		return this.model(this.indexOf(source));
-	};
+		assign: function (items) {
+			return this.reset(items);
+		}
+	}));
 
 	function ViewsList() {
 		ArrayWrapper.apply(this, arguments);
