@@ -1614,9 +1614,10 @@
 			model = model.model(prop[i]);
 		}
 
-		var last = lastItem(prop);
+		var last = lastItem(prop),
+			value = model.get(last);
 
-		if (typeof model.get(last) === 'object') {
+		if (value && typeof value === 'object') {
 			model = model.model(last);
 		}
 
