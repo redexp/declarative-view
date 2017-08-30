@@ -591,7 +591,7 @@ describe('each helper', function () {
 		expect(users.views.get(1).context).to.equal(view.data.users[1]);
 		expect(users.views.length()).to.equal(view.data.users.length);
 		expect(users.views.indexByContext(users.get(0))).to.equal(0);
-		expect(users.views.getByContext(users.get(0))).to.equal(users.views.get(0));
+		expect(users.views.viewOf(users.get(0))).to.equal(users.views.get(0));
 		expect(users.views['ol']).to.equal(view.views['ol']);
 		expect(users.views['ol'].length()).to.equal(view.data.users.length);
 	});

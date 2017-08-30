@@ -1420,7 +1420,7 @@
 			}
 		},
 
-		getByContext: function (context) {
+		viewOf: function (context) {
 			var arr = this.context;
 			for (var i = 0, len = arr.length; i < len; i++) {
 				if (arr[i].context === context) return arr[i];
