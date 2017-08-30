@@ -861,7 +861,7 @@
 		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
 		tpl.detach();
 
-		list.views = list.views || {};
+		list.views = list.views || views;
 		view.views = view.views || {};
 		list.views[selector] = view.views[selector] = views;
 
@@ -1404,6 +1404,10 @@
 		}
 	}));
 
+	//endregion
+
+	//region ====================== ViewsList =====================================
+
 	function ViewsList() {
 		ArrayWrapper.apply(this, arguments);
 	}
@@ -1413,6 +1417,13 @@
 			var arr = this.context;
 			for (var i = 0, len = arr.length; i < len; i++) {
 				if (arr[i].context === context) return i;
+			}
+		},
+
+		getByContext: function (context) {
+			var arr = this.context;
+			for (var i = 0, len = arr.length; i < len; i++) {
+				if (arr[i].context === context) return arr[i];
 			}
 		}
 	});

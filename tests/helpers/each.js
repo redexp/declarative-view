@@ -560,4 +560,39 @@ describe('each helper', function () {
 		expect(view.views['@root'].get(0).get('user')).to.equal(view.get('users')[0]);
 		expect(view.find('> li').first()).to.have.text('test1');
 	});
+	
+	it('should add views prop to list', function () {
+		var view = new DeclarativeView({
+			node: '<div><ul><li></li></ul><ol><li></li></ol></div>',
+			
+			data: {
+				users: [{name: 'value1'}, {name: 'value2'}]
+			},
+			
+			template: {
+				'ul': {
+					each: {
+						prop: 'users'
+					}
+				},
+				'ol': {
+					each: {
+						prop: 'users'
+					}
+				}
+			}
+		});
+		
+		var users = view.model('users');
+		
+		expect(users.views).to.equal(users.views['ul']);
+		expect(users.views).to.equal(view.views['ul']);
+		expect(users.views.get(0).context).to.equal(view.data.users[0]);
+		expect(users.views.get(1).context).to.equal(view.data.users[1]);
+		expect(users.views.length()).to.equal(view.data.users.length);
+		expect(users.views.indexByContext(users.get(0))).to.equal(0);
+		expect(users.views.getByContext(users.get(0))).to.equal(users.views.get(0));
+		expect(users.views['ol']).to.equal(view.views['ol']);
+		expect(users.views['ol'].length()).to.equal(view.data.users.length);
+	});
 });
