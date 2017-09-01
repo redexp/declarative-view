@@ -854,9 +854,16 @@
 
 	function eachHelper(view, selector, options) {
 		var root = view.find(selector),
-			list = view.model(options.prop),
+			prop = options.prop,
+			list = view.model(typeof prop === 'string' && prop.indexOf('.') > -1 ? prop.split('.') : prop),
 			views = new ViewsList([]),
 			tplSelector = options.node === false ? [] : options.node || '> *';
+
+		if (_DEV_) {
+			if (!list) {
+				throw new Error('Wrong each.prop path ' + JSON.stringify(prop) + ' in class ' + this.constructor.name);
+			}
+		}
 
 		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
 		tpl.detach();

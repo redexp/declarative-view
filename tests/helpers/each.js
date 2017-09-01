@@ -595,4 +595,34 @@ describe('each helper', function () {
 		expect(users.views['ol']).to.equal(view.views['ol']);
 		expect(users.views['ol'].length()).to.equal(view.data.users.length);
 	});
+
+	it('should handle dot in prop path', function () {
+		var view = new DeclarativeView({
+			node: '<ul><li></li></ul>',
+			data: {
+				test: {
+					users: [
+						{name: 'value1'},
+						{name: 'value2'}
+					]
+				}
+			},
+			template: {
+				'@root': {
+					each: {
+						prop: 'test.users',
+						template: {
+							'@root': {
+								text: '=name'
+							}
+						}
+					}
+				}
+			}
+		});
+
+		expect(view.node.children().length).to.equal(2);
+		expect(view.node.children().eq(0)).to.have.text('value1');
+		expect(view.node.children().eq(1)).to.have.text('value2');
+	});
 });
