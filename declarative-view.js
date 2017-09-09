@@ -861,7 +861,7 @@
 			prop = options.prop,
 			list = view.model(typeof prop === 'string' && prop.indexOf('.') > -1 ? prop.split('.') : prop),
 			views = new ViewsList([]),
-			tplSelector = options.node === false ? [] : options.node || '> *';
+			tplSelector = options.node === false ? false : options.node || '> *';
 
 		if (_DEV_) {
 			if (!list) {
@@ -869,8 +869,8 @@
 			}
 		}
 
-		var tpl = typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
-		tpl.detach();
+		var tpl = tplSelector === false ? null : typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
+		if (tpl) tpl.detach();
 
 		list.views = list.views || views;
 		view.views = view.views || {};
@@ -890,7 +890,7 @@
 				ViewClass = options.view;
 			}
 			else if (options.view) {
-				var res = options.view.call(view, item, tpl.clone());
+				var res = options.view.call(view, item, tpl && tpl.clone());
 
 				if (isClass(res)) {
 					ViewClass = res;
@@ -925,7 +925,7 @@
 				}
 
 				itemView = new ViewClass({
-					node: tpl.clone(),
+					node: tpl && tpl.clone(),
 					parent: view,
 					data: data,
 					wrappers: wrappers,
