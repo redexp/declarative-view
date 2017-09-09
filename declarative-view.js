@@ -637,6 +637,10 @@
 
 			var helpers = template[selector];
 
+			if (typeof helpers === 'function') {
+				helpers = helpers.call(view);
+			}
+
 			if (selector.charAt(0) === '&') {
 				selector = selector.slice(1);
 			}
@@ -861,7 +865,7 @@
 
 		if (_DEV_) {
 			if (!list) {
-				throw new Error('Wrong each.prop path ' + JSON.stringify(prop) + ' in class ' + this.constructor.name);
+				throw new Error('Wrong each.prop path ' + JSON.stringify(prop) + ' in class ' + view.constructor.name);
 			}
 		}
 
@@ -1031,7 +1035,7 @@
 			break;
 
 		default:
-			throw new Error('Unknown options type');
+			throw new Error('Unknown options type ' + (typeof options) + ' in view class ' + view.constructor.name);
 		}
 
 		function addListener(events, func) {
@@ -1615,7 +1619,7 @@
 
 		if (_DEV_) {
 			if (typeof selector === 'undefined') {
-				throw new Error('Undefined ui alias "' + name + '" in view ' + this.constructor.name);
+				throw new Error('Undefined ui alias "' + name + '" in view ' + view.constructor.name);
 			}
 		}
 

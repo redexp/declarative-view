@@ -28,4 +28,26 @@ describe('template helper', function () {
 		expect(view.find('.test.text')).to.have.text('text');
 		expect(view.find('.test .inner')).to.have.text('inner');
     });
+
+    it('should handle helpers and it options as function', function () {
+    	var view = new DeclarativeView({
+			template: {
+				'@root': function () {
+					expect(this).to.be.instanceOf(DeclarativeView);
+
+					return {
+						attr: {
+							test: function () {
+								expect(this).to.be.instanceOf(DeclarativeView);
+
+								return 'value';
+							}
+						}
+					}
+				}
+			}
+		});
+
+    	expect(view.node).to.have.attr('test', 'value');
+    });
 });
