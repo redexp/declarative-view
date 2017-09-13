@@ -856,6 +856,21 @@
 
 	//region ====================== Each Helper ===================================
 
+	/**
+	 * @param {DeclarativeView} view
+	 * @param {string} selector
+	 * @param {{
+	 * 	 prop: string|Array,
+	 * 	 view: DeclarativeView|function,
+	 * 	 node: string|boolean,
+	 * 	 dataProp?: string,
+	 * 	 template?: Object,
+	 * 	 add?: function,
+	 * 	 remove?: function,
+	 * 	 move?: function,
+	 * 	 sort?: function
+	 * }} options
+	 */
 	function eachHelper(view, selector, options) {
 		var root = view.find(selector),
 			prop = options.prop,
@@ -907,8 +922,8 @@
 				var data = {},
 					wrappers = null;
 
-				if (options.viewProp) {
-					data[options.viewProp] = item;
+				if (options.dataProp) {
+					data[options.dataProp] = item;
 
 					if (typeof item === 'object' && item !== null) {
 						wrappers = {

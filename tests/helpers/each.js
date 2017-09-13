@@ -532,7 +532,7 @@ describe('each helper', function () {
 		expect(sort).to.be.always.calledOn(view);
 	});
 
-	it('viewProp option', function () {
+	it('dataProp option', function () {
 		var view = new DeclarativeView({
 			node: '<ul><li></li></ul>',
 			data: {
@@ -545,7 +545,7 @@ describe('each helper', function () {
 				'@root': {
 					each: {
 						prop: 'users',
-						viewProp: 'user',
+						dataProp: 'user',
 						template: {
 							'@root': {
 								text: '=user.name'
