@@ -1,6 +1,6 @@
 {
   "name": "declarative-view",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "View class based on jQuery with declarative configuration",
   "keywords": ["view", "jquery", "declarative"],
   "main": "declarative-view.js",

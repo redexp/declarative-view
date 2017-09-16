@@ -192,4 +192,20 @@ describe('on, once helpers', function () {
 		expect(clickCb).to.have.callCount(1);
 		expect(spanCb).to.have.callCount(1);
 	});
+
+	it('click', function () {
+		var click = sinon.spy();
+
+		var view = new DeclarativeView({
+			template: {
+				'@root': {
+					click: click
+				}
+			}
+		});
+
+		view.node.click();
+
+		expect(click).to.have.callCount(1);
+	});
 });

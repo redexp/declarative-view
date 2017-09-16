@@ -621,6 +621,7 @@
 		text: textHelper,
 		on: onHelper,
 		once: onceHelper,
+		click: clickHelper,
 		connect: connectHelper,
 		visible: visibleHelper,
 		show: visibleHelper,
@@ -790,6 +791,10 @@
 
 	function onceHelper(view, selector, events) {
 		onHelper(view, selector, events, true);
+	}
+
+	function clickHelper(view, selector, options) {
+		onHelper(view, selector, {click: options});
 	}
 
 	function connectHelper(view, selector, options) {
