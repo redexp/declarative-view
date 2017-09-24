@@ -378,4 +378,31 @@ describe('model', function () {
 		expect(setTest).to.have.callCount(3);
 		expect(setTest).to.be.calledWith('prop', 'value2', 'value1');
 	});
+
+	it('assign mode', function () {
+		var view = new DeclarativeView({
+			data: {
+				test: {
+					user: {
+						name: 'value'
+					}
+				}
+			}
+		});
+
+		view.assign({test2: {}}, 'ignore');
+		expect(view.data).to.eql({test: {user: {name: 'value'}}, test2: {}});
+		view.assign({test2: {name: 'val'}, test3: {}}, 'defaults');
+		expect(view.data).to.eql({test: {user: {name: 'value'}}, test2: {}});
+		view.assign({test2: {name: 'val1'}});
+		view.assign({test2: {name: 'val2', name2: 'val2'}}, 'defaults');
+		expect(view.data).to.eql({test: {user: {name: 'value'}}, test2: {name: 'val2'}});
+		view.model('test').assign({user: {name: 'value2'}, user2: {}}, 'ignore');
+		expect(view.data).to.eql({test: {user: {name: 'value2'}, user2: {}}, test2: {name: 'val2'}});
+		view.model('test').assign({user2: {name: 'val'}, user3: {}}, 'defaults');
+		expect(view.data).to.eql({test: {user: {name: 'value2'}, user2: {}}, test2: {name: 'val2'}});
+		view.model('test').assign({user2: {name: 'val'}});
+		view.model('test').assign({user2: {name: 'val2', name2: 'val2'}}, 'defaults');
+		expect(view.data).to.eql({test: {user: {name: 'value2'}, user2: {name: 'val2'}}, test2: {name: 'val2'}});
+	});
 });
