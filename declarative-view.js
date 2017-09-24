@@ -570,12 +570,7 @@
 
 				if (!hasProp && mode === 'defaults') continue;
 
-				if (!hasProp && mode === 'ignore') {
-					this.set(prop, value);
-					continue;
-				}
-
-				if (value && typeof value === 'object') {
+				if (hasProp && value && typeof value === 'object') {
 					this.model(prop).assign(value, mode);
 				}
 				else {

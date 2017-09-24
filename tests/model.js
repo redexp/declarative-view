@@ -390,14 +390,14 @@ describe('model', function () {
 			}
 		});
 
-		view.assign({test2: {}}, 'ignore');
+		view.assign({test2: {}});
 		expect(view.data).to.eql({test: {user: {name: 'value'}}, test2: {}});
 		view.assign({test2: {name: 'val'}, test3: {}}, 'defaults');
 		expect(view.data).to.eql({test: {user: {name: 'value'}}, test2: {}});
 		view.assign({test2: {name: 'val1'}});
 		view.assign({test2: {name: 'val2', name2: 'val2'}}, 'defaults');
 		expect(view.data).to.eql({test: {user: {name: 'value'}}, test2: {name: 'val2'}});
-		view.model('test').assign({user: {name: 'value2'}, user2: {}}, 'ignore');
+		view.model('test').assign({user: {name: 'value2'}, user2: {}});
 		expect(view.data).to.eql({test: {user: {name: 'value2'}, user2: {}}, test2: {name: 'val2'}});
 		view.model('test').assign({user2: {name: 'val'}, user3: {}}, 'defaults');
 		expect(view.data).to.eql({test: {user: {name: 'value2'}, user2: {}}, test2: {name: 'val2'}});
