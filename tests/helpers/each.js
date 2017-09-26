@@ -625,4 +625,26 @@ describe('each helper', function () {
 		expect(view.node.children().eq(0)).to.have.text('value1');
 		expect(view.node.children().eq(1)).to.have.text('value2');
 	});
+
+	it('should add dataIndexProp', function () {
+		var view = new DeclarativeView({
+			node: '<ul><li></li></ul>',
+
+			data: {
+				users: [1, 2]
+			},
+
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						dataIndexProp: 'position'
+					}
+				}
+			}
+		});
+
+		expect(view.views['@root'].get(0).data).to.eql({value: 1, position: 0});
+		expect(view.views['@root'].get(1).data).to.eql({value: 2, position: 1});
+	});
 });

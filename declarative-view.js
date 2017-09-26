@@ -876,6 +876,7 @@
 	 * 	 view: DeclarativeView|function,
 	 * 	 node: string|boolean,
 	 * 	 dataProp?: string,
+	 * 	 dataIndexProp?: string,
 	 * 	 template?: Object,
 	 * 	 add?: function,
 	 * 	 remove?: function,
@@ -949,6 +950,10 @@
 				}
 				else {
 					data.value = item;
+				}
+
+				if (options.dataIndexProp) {
+					data[options.dataIndexProp] = index;
 				}
 
 				itemView = new ViewClass({
