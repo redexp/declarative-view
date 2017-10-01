@@ -972,19 +972,23 @@
 
 			if (options.add) {
 				options.add.call(view, root, itemView, index);
-				return;
-			}
-
-			if (index === 0) {
-				if (views.length() === 1) {
-					root.append(itemView.node);
-				}
-				else {
-					itemView.node.insertBefore(views.get(1).node);
-				}
 			}
 			else {
-				itemView.node.insertAfter(views.get(index - 1).node);
+				if (index === 0) {
+					if (views.length() === 1) {
+						root.append(itemView.node);
+					}
+					else {
+						itemView.node.insertBefore(views.get(1).node);
+					}
+				}
+				else {
+					itemView.node.insertAfter(views.get(index - 1).node);
+				}
+			}
+
+			if (options.dataIndexProp) {
+				updateDataIndexProp();
 			}
 		}
 
@@ -997,6 +1001,10 @@
 			}
 
 			views.removeAt(index);
+
+			if (options.dataIndexProp) {
+				updateDataIndexProp();
+			}
 		}
 
 		function move(item, index, oldIndex) {
@@ -1004,34 +1012,48 @@
 
 			if (options.move) {
 				options.move.call(view, root, views.get(index), index, oldIndex);
-				return;
-			}
-
-			var node = views.get(index).node;
-
-			if (index === 0) {
-				if (views.length() === 1) {
-					node.appendTo(root);
-				}
-				else {
-					node.insertBefore(views.get(1).node);
-				}
 			}
 			else {
-				node.insertAfter(views.get(index - 1).node);
+				var node = views.get(index).node;
+
+				if (index === 0) {
+					if (views.length() === 1) {
+						node.appendTo(root);
+					}
+					else {
+						node.insertBefore(views.get(1).node);
+					}
+				}
+				else {
+					node.insertAfter(views.get(index - 1).node);
+				}
+			}
+
+			if (options.dataIndexProp) {
+				updateDataIndexProp();
 			}
 		}
 
 		function sort() {
 			if (options.sort) {
 				options.sort.call(view, root, views);
-				return;
+			}
+			else {
+				list.forEach(function (item, index) {
+					var oldIndex = views.indexByContext(item);
+					if (index === oldIndex) return;
+					move(item, index, oldIndex);
+				});
 			}
 
-			list.forEach(function (item, index) {
-				var oldIndex = views.indexByContext(item);
-				if (index === oldIndex) return;
-				move(item, index, oldIndex);
+			if (options.dataIndexProp) {
+				updateDataIndexProp();
+			}
+		}
+
+		function updateDataIndexProp() {
+			views.forEach(function (view, index) {
+				view.set(options.dataIndexProp, index);
 			});
 		}
 	}

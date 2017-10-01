@@ -631,13 +631,14 @@ describe('each helper', function () {
 			node: '<ul><li></li></ul>',
 
 			data: {
-				users: [1, 2]
+				users: [1, 2, 3]
 			},
 
 			template: {
 				'@root': {
 					each: {
 						prop: 'users',
+						dataProp: 'value',
 						dataIndexProp: 'position'
 					}
 				}
@@ -646,5 +647,33 @@ describe('each helper', function () {
 
 		expect(view.views['@root'].get(0).data).to.eql({value: 1, position: 0});
 		expect(view.views['@root'].get(1).data).to.eql({value: 2, position: 1});
+		expect(view.views['@root'].get(2).data).to.eql({value: 3, position: 2});
+
+		view.model('users').moveFrom(0, 1);
+
+		expect(view.views['@root'].get(0).data).to.eql({value: 2, position: 0});
+		expect(view.views['@root'].get(1).data).to.eql({value: 1, position: 1});
+		expect(view.views['@root'].get(2).data).to.eql({value: 3, position: 2});
+
+		view.model('users').add(4, 1);
+
+		expect(view.views['@root'].get(0).data).to.eql({value: 2, position: 0});
+		expect(view.views['@root'].get(1).data).to.eql({value: 4, position: 1});
+		expect(view.views['@root'].get(2).data).to.eql({value: 1, position: 2});
+		expect(view.views['@root'].get(3).data).to.eql({value: 3, position: 3});
+
+		view.model('users').removeAt(0);
+
+		expect(view.views['@root'].get(0).data).to.eql({value: 4, position: 0});
+		expect(view.views['@root'].get(1).data).to.eql({value: 1, position: 1});
+		expect(view.views['@root'].get(2).data).to.eql({value: 3, position: 2});
+
+		view.model('users').sort(function (a, b) {
+			return a - b;
+		});
+
+		expect(view.views['@root'].get(0).data).to.eql({value: 1, position: 0});
+		expect(view.views['@root'].get(1).data).to.eql({value: 3, position: 1});
+		expect(view.views['@root'].get(2).data).to.eql({value: 4, position: 2});
 	});
 });
