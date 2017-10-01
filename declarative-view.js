@@ -17,18 +17,18 @@
 	 */
 	var _DEV_ = true;
 
-	//region ====================== EventsHandler =================================
+	//region ====================== EventEmitter ==================================
 
-	function EventsHandler() {
+	function EventEmitter() {
 		this.events = {};
 		this.listeners = [];
 	}
 
-	extend(EventsHandler, {
+	extend(EventEmitter, {
 		extend: extendClass
 	});
 
-	extend(EventsHandler.prototype, {
+	extend(EventEmitter.prototype, {
 		/**
 		 * @param {string|Array} events
 		 * @param {Function} callback
@@ -471,7 +471,7 @@
 		}
 	});
 
-	extendClass(DeclarativeView, EventsHandler, {
+	extendClass(DeclarativeView, EventEmitter, {
 		ui: {
 			root: ''
 		},
@@ -1194,12 +1194,12 @@
 	//region ====================== ObjectWrapper =================================
 
 	function ObjectWrapper(context) {
-		EventsHandler.call(this);
+		EventEmitter.call(this);
 
 		this.context = context;
 	}
 
-	extendClass(ObjectWrapper, EventsHandler, {
+	extendClass(ObjectWrapper, EventEmitter, {
 		get: function (prop) {
 			if (arguments.length === 0) {
 				return this.context;
@@ -1703,6 +1703,10 @@
 	}
 
 	//endregion
+
+	DeclarativeView.EventEmitter = EventEmitter;
+	DeclarativeView.ObjectWrapper = ObjectWrapper;
+	DeclarativeView.ArrayWrapper = ArrayWrapper;
 
 	return DeclarativeView;
 });
