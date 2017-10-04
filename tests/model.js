@@ -405,4 +405,27 @@ describe('model', function () {
 		view.model('test').assign({user2: {name: 'val2', name2: 'val2'}}, 'defaults');
 		expect(view.data).to.eql({test: {user: {name: 'value2'}, user2: {name: 'val2'}}, test2: {name: 'val2'}});
 	});
+
+	it('filterWhere, findWhere', function () {
+		var view = new DeclarativeView({
+			data: {
+				users: [
+					{name: 'one', age: 23},
+					{name: 'one', age: 24},
+					{name: 'two', age: 23},
+					{name: 'two', age: 23, id: 1},
+					{name: 'three', age: 25}
+				]
+			}
+		});
+
+		expect(view.model('users').filterWhere({name: 'one'})).to.eql([view.data.users[0], view.data.users[1]]);
+		expect(view.model('users').filterWhere({name: 'two', age: 23})).to.eql([view.data.users[2], view.data.users[3]]);
+		expect(view.model('users').filterWhere({name: 'three', age: 23})).to.eql([]);
+		expect(view.model('users').findWhere({name: 'one'})).to.equal(view.data.users[0]);
+		expect(view.model('users').findWhere({name: 'one', age: 24})).to.equal(view.data.users[1]);
+		expect(view.model('users').findWhere({name: 'two', age: 23})).to.equal(view.data.users[2]);
+		expect(view.model('users').findWhere({name: 'two', age: 23, id: 2})).to.be.undefined;
+		expect(view.model('users').findWhere({name: 'two', age: 23, id: 1})).to.equal(view.data.users[3]);
+	});
 });

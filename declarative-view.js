@@ -1448,6 +1448,30 @@
 			this.removeAll();
 			this.add(items);
 			return this;
+		},
+
+		filterWhere: function (props) {
+			return this.filter(function (item) {
+				for (var prop in props) {
+					if (!props.hasOwnProperty(prop)) continue;
+
+					if (item[prop] !== props[prop]) return false;
+				}
+
+				return true;
+			});
+		},
+
+		findWhere: function (props) {
+			return this.find(function (item) {
+				for (var prop in props) {
+					if (!props.hasOwnProperty(prop)) continue;
+
+					if (item[prop] !== props[prop]) return false;
+				}
+
+				return true;
+			});
 		}
 	});
 
