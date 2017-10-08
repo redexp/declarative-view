@@ -676,4 +676,26 @@ describe('each helper', function () {
 		expect(view.views['@root'].get(1).data).to.eql({value: 3, position: 1});
 		expect(view.views['@root'].get(2).data).to.eql({value: 4, position: 2});
 	});
+
+	it('should remove class', function () {
+		var view = new DeclarativeView({
+			node: '<ul><li class="test user"></li></ul>',
+			data: {
+				users: [1, 2]
+			},
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						removeClass: 'test'
+					}
+				}
+			}
+		});
+
+		expect(view.node.children().eq(0)).not.to.have.class('test');
+		expect(view.node.children().eq(0)).to.have.class('user');
+		expect(view.node.children().eq(1)).not.to.have.class('test');
+		expect(view.node.children().eq(1)).to.have.class('user');
+	});
 });

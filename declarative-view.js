@@ -877,6 +877,7 @@
 	 * 	 node: string|boolean,
 	 * 	 dataProp?: string,
 	 * 	 dataIndexProp?: string,
+	 * 	 removeClass?: string,
 	 * 	 template?: Object,
 	 * 	 add?: function,
 	 * 	 remove?: function,
@@ -898,7 +899,12 @@
 		}
 
 		var tpl = tplSelector === false ? null : typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
-		if (tpl) tpl.detach();
+		if (tpl) {
+			tpl.detach();
+			if (options.removeClass) {
+				tpl.removeClass(options.removeClass);
+			}
+		}
 
 		list.views = list.views || views;
 		view.views = view.views || {};
