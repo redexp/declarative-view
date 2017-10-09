@@ -1352,7 +1352,10 @@
 				return this;
 			}
 
-			this.removeAt(this.indexOf(item));
+			var index = this.indexOf(item);
+			if (index > -1) {
+				this.removeAt(index);
+			}
 
 			return this;
 		},

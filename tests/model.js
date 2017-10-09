@@ -428,4 +428,19 @@ describe('model', function () {
 		expect(view.model('users').findWhere({name: 'two', age: 23, id: 2})).to.be.undefined;
 		expect(view.model('users').findWhere({name: 'two', age: 23, id: 1})).to.equal(view.data.users[3]);
 	});
+
+	it('should not remove -1', function () {
+		var view = new DeclarativeView({
+			data: {
+				users: [1, 2, 3]
+			}
+		});
+
+		view.model('users').remove(4);
+		expect(view.data.users).to.eql([1, 2, 3]);
+		view.model('users').remove(2);
+		expect(view.data.users).to.eql([1, 3]);
+		view.model('users').removeAt(-1);
+		expect(view.data.users).to.eql([1]);
+	});
 });
