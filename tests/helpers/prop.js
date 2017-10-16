@@ -98,4 +98,50 @@ describe('prop helper', function () {
 		expect(eventIterator).to.be.calledWith('a', 1, true);
 		expect(functionIterator).to.have.callCount(4);
 	});
+
+	it('value helper', function () {
+		var view = new DeclarativeView({
+			node: '<input type="text" />',
+
+			data: {
+				user: {
+					name: 'test'
+				}
+			},
+
+			template: {
+				'@root': {
+					value: '@user.name'
+				}
+			}
+		});
+
+		expect(view.node).to.have.prop('value', 'test');
+		view.model('user').set('name', 'val1');
+		expect(view.node).to.have.prop('value', 'val1');
+	});
+
+	it('checked helper', function () {
+		var view = new DeclarativeView({
+			node: '<input type="checkbox" />',
+
+			data: {
+				user: {
+					name: 'test'
+				}
+			},
+
+			template: {
+				'@root': {
+					checked: '@user.name'
+				}
+			}
+		});
+
+		expect(view.node).to.have.prop('checked', true);
+		view.model('user').set('name', 'val1');
+		expect(view.node).to.have.prop('checked', true);
+		view.model('user').set('name', '');
+		expect(view.node).to.have.prop('checked', false);
+	});
 });

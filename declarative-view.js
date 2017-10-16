@@ -629,6 +629,8 @@
 		on: onHelper,
 		once: onceHelper,
 		click: clickHelper,
+		value: valueHelper,
+		checked: checkedHelper,
 		connect: connectHelper,
 		visible: visibleHelper,
 		show: visibleHelper,
@@ -802,6 +804,22 @@
 
 	function clickHelper(view, selector, options) {
 		onHelper(view, selector, {click: options});
+	}
+
+	function valueHelper(view, selector, options) {
+		propHelper(view, selector, {value: options});
+	}
+
+	function checkedHelper(view, selector, options) {
+		convertHelperOptionsKeysToFirstArgument({
+			view: view,
+			node: view.find(selector),
+			method: 'prop',
+			options: {checked: options},
+			wrapper: function (value) {
+				return !!value;
+			}
+		});
 	}
 
 	function connectHelper(view, selector, options) {
