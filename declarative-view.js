@@ -1490,15 +1490,41 @@
 		},
 
 		findWhere: function (props) {
-			return this.find(function (item) {
+			var arr = this.context;
+
+			for (var i = 0, len = arr.length; i < len; i++) {
+				var valid = false;
+
 				for (var prop in props) {
 					if (!props.hasOwnProperty(prop)) continue;
 
-					if (item[prop] !== props[prop]) return false;
+					valid = arr[i][prop] === props[prop];
+
+					if (!valid) break;
 				}
 
-				return true;
-			});
+				if (valid) return arr[i];
+			}
+		},
+
+		indexWhere: function (props) {
+			var arr = this.context;
+
+			for (var i = 0, len = arr.length; i < len; i++) {
+				var valid = false;
+
+				for (var prop in props) {
+					if (!props.hasOwnProperty(prop)) continue;
+
+					valid = arr[i][prop] === props[prop];
+
+					if (!valid) break;
+				}
+
+				if (valid) return i;
+			}
+
+			return -1;
 		}
 	});
 
@@ -1516,7 +1542,13 @@
 
 	extendClass(ViewArrayWrapper, ArrayWrapper, extend({}, ModelMixin, {
 		modelOf: function (source) {
-			return this.model(this.indexOf(source));
+			var i = this.indexOf(source);
+			if (i > -1) return this.model(i);
+		},
+
+		modelWhere: function (props) {
+			var i = this.indexWhere(props);
+			if (i > -1) return this.model(i);
 		},
 
 		assign: function (items) {

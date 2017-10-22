@@ -443,4 +443,21 @@ describe('model', function () {
 		view.model('users').removeAt(-1);
 		expect(view.data.users).to.eql([1]);
 	});
+
+	it('should indexWhere, modelWhere', function () {
+		var view = new DeclarativeView({
+			data: {
+				users: [
+					{name: 'val1'},
+					{name: 'val2'},
+					{name: 'val3'}
+				]
+			}
+		});
+
+		expect(view.model('users').indexWhere({name: 'val2'})).to.equal(1);
+		expect(view.model('users').indexWhere({name: 'val4'})).to.equal(-1);
+		expect(view.model('users').modelWhere({name: 'val2'})).to.equal(view.model('users').model(1));
+		expect(view.model('users').modelWhere({name: 'val4'})).to.be.undefined;
+	});
 });
