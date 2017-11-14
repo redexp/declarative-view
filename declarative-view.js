@@ -904,6 +904,8 @@
 	 * }} options
 	 */
 	function eachHelper(view, selector, options) {
+		if (options === null) return;
+
 		var root = view.find(selector),
 			prop = options.prop,
 			list = view.model(typeof prop === 'string' && prop.indexOf('.') > -1 ? prop.split('.') : prop),

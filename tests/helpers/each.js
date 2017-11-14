@@ -698,4 +698,38 @@ describe('each helper', function () {
 		expect(view.node.children().eq(1)).not.to.have.class('test');
 		expect(view.node.children().eq(1)).to.have.class('user');
 	});
+
+	it('should ignore null options', function () {
+		var View1 = DeclarativeView.extend({
+			node: '<ul><li></li></ul>',
+
+			data: function () {
+				return {
+					users: [1, 2, 3]
+				};
+			},
+
+			template: {
+				'@root': {
+					each: {
+						prop: 'users'
+					}
+				}
+			}
+		});
+
+		var View2 = View1.extend({
+			template: {
+				'@root': {
+					each: null
+				}
+			}
+		});
+
+		var view1 = new View1();
+		var view2 = new View2();
+
+		expect(view1.node.children().length).to.equal(3);
+		expect(view2.node.children().length).to.equal(1);
+	});
 });
