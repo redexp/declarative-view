@@ -170,14 +170,16 @@ describe('extend', function () {
 			data: function () {
 				return {
 					test1: this.data.name + 'Test',
-					test2: this.data.user + 'Test'
+					test2: this.data.user + 'Test',
+					users: []
 				};
 			}
 		});
 
 		var view = new View({
 			data: {
-				user: 'value2'
+				user: 'value2',
+				users: [1, 2]
 			}
 		});
 
@@ -185,5 +187,6 @@ describe('extend', function () {
 		expect(view.data.user).to.equal('value2');
 		expect(view.data.test1).to.equal('value1Test');
 		expect(view.data.test2).to.equal('value2Test');
+		expect(view.data.users).to.eql([1, 2]);
 	});
 });

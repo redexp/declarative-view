@@ -1689,12 +1689,22 @@
 
 		var list = params.list,
 			func = params.deep ? extendDeep : extend,
-			target = params.target || {};
+			target = {};
 
 		for (var i = list.length - 1; i >= 0; i--) {
 			var value = list[i];
 
 			func(target, typeof value === 'function' ? value.call(params.context, func) : params.deep ? cloneDeep(value) : value);
+		}
+
+		if (params.target) {
+			for (var prop in target) {
+				if (!target.hasOwnProperty(prop) || params.target.hasOwnProperty(prop)) continue;
+
+				params.target[prop] = target[prop];
+			}
+
+			target = params.target;
 		}
 
 		return target;
