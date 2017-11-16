@@ -158,4 +158,32 @@ describe('extend', function () {
 			}
 		});
 	});
+
+	it('should have options.data on extend data', function () {
+		var View = DeclarativeView.extend({
+			constructor: function (options) {
+				this.data = {name: 'value1'};
+
+				DeclarativeView.call(this, options);
+			},
+
+			data: function () {
+				return {
+					test1: this.data.name + 'Test',
+					test2: this.data.user + 'Test'
+				};
+			}
+		});
+
+		var view = new View({
+			data: {
+				user: 'value2'
+			}
+		});
+
+		expect(view.data.name).to.equal('value1');
+		expect(view.data.user).to.equal('value2');
+		expect(view.data.test1).to.equal('value1Test');
+		expect(view.data.test2).to.equal('value2Test');
+	});
 });

@@ -430,10 +430,13 @@
 			this.wrappers.targets = [].concat(wrappers.targets);
 		}
 
-		this.data = extendPrototypeProp({object: this, prop: 'data', deep: false});
+		if (!this.hasOwnProperty('data')) {
+			this.data = {};
+		}
 		if (options.data) {
 			extend(this.data, options.data);
 		}
+		extendPrototypeProp({object: this, target: this.data, prop: 'data', deep: false});
 
 		this.ui = extendPrototypeProp({object: this, prop: 'ui', deep: false});
 		if (options.ui) {
@@ -1657,6 +1660,7 @@
 	/**
 	 * @param {{
 	 *   object: Object,
+	 *   target?: Object,
 	 *   prop: string,
 	 *   deep: boolean,
 	 *   list?: Array,
@@ -1685,7 +1689,7 @@
 
 		var list = params.list,
 			func = params.deep ? extendDeep : extend,
-			target = {};
+			target = params.target || {};
 
 		for (var i = list.length - 1; i >= 0; i--) {
 			var value = list[i];
