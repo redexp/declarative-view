@@ -142,6 +142,42 @@ describe('Events', function () {
 		expect(set).to.be.calledWith(true, '', 'test');
 	});
 
+	it('should handle /prop event', function () {
+		var cb = sinon.spy(function () {
+			return this.data.prop + this.data.user.name;
+		});
+
+		var view = new DeclarativeView({
+			data: {
+				prop: 1,
+				user: {
+					name: 'value'
+				}
+			},
+			template: {
+				'@root': {
+					text: {
+						'> /prop /user.name': cb
+					}
+				}
+			}
+		});
+
+		expect(cb).to.have.callCount(1);
+		expect(cb).to.be.calledWith();
+		expect(view.node).to.have.text('1value');
+
+		view.set('prop', 2);
+		expect(cb).to.have.callCount(2);
+		expect(cb).to.be.calledWith(2, 1);
+		expect(view.node).to.have.text('2value');
+
+		view.model('user').set('name', 'test');
+		expect(cb).to.have.callCount(3);
+		expect(cb).to.be.calledWith('test', 'value');
+		expect(view.node).to.have.text('2test');
+	});
+
     it('listenOn, stopListening, listenOnce', function () {
 		var view = new DeclarativeView();
 		var node = view.node;
@@ -246,5 +282,37 @@ describe('Events', function () {
 		expect(view.listeners).to.be.empty;
 		expect(view2.events).to.be.empty;
 		expect(view2.listeners).to.be.empty;
+    });
+
+    it('should handle > event', function () {
+    	var view = new DeclarativeView({
+			data: {
+				prop1: 1,
+				prop2: 2
+			},
+
+			template: {
+				'@root': {
+					text: {
+						'> set/prop1 set/prop2': function () {
+							return this.data.prop1 + this.data.prop2;
+						}
+					}
+				}
+			}
+		});
+
+    	var cb = sinon.spy();
+
+    	view.on('> event', cb);
+		expect(cb).to.have.callCount(1);
+		view.trigger('event');
+		expect(cb).to.have.callCount(2);
+
+		expect(view.node).to.have.text('3');
+		view.set('prop1', 3);
+		expect(view.node).to.have.text('5');
+		view.set('prop2', 4);
+		expect(view.node).to.have.text('7');
     });
 });

@@ -732,4 +732,41 @@ describe('each helper', function () {
 		expect(view1.node.children().length).to.equal(3);
 		expect(view2.node.children().length).to.equal(1);
 	});
+
+	it('should trigger added after adding view to dom', function () {
+		var added = sinon.spy();
+		var removing = sinon.spy();
+
+		var View = DeclarativeView.extend({
+			constructor: function (options) {
+				DeclarativeView.call(this, options);
+
+				this.once('added', added);
+				this.once('removing', removing);
+			}
+		});
+
+		var view = new DeclarativeView({
+			node: '<ul><li></li></ul>',
+			data: {
+				users: [1, 2, 3]
+			},
+			template: {
+				'@root': {
+					each: {
+						prop: 'users',
+						view: View
+					}
+				}
+			}
+		});
+
+		expect(added).to.have.callCount(3);
+		expect(removing).to.have.callCount(0);
+
+		view.model('users').removeAll();
+
+		expect(added).to.have.callCount(3);
+		expect(removing).to.have.callCount(3);
+	});
 });

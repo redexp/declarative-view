@@ -49,10 +49,13 @@
 			events.forEach(function (event) {
 				if (!event) return;
 
+				if (event === '>') {
+					callback();
+					return;
+				}
+
 				var wrapper = callback,
 					not = false,
-					eq = false,
-					a = false,
 					prop;
 
 				if (event.charAt(0) === '!') {
@@ -60,14 +63,13 @@
 					event = event.slice(1);
 				}
 
-				if (event.charAt(0) === '=') {
-					eq = true;
-				}
-				else if (event.charAt(0) === '@') {
-					a = true;
-				}
+				var char = event.charAt(0),
+					eq = char === '=',
+					p = char === '/',
+					a = char === '@'
+				;
 
-				if (eq || a) {
+				if (eq || p || a) {
 					prop = event.slice(1).split('.');
 				}
 
@@ -95,7 +97,7 @@
 
 				if (eq) return;
 
-				if (a) {
+				if (p || a) {
 					var model = modelByProp(view, prop);
 
 					if (view !== model) {
@@ -540,10 +542,22 @@
 				var model = this;
 
 				for (var i = 0, len = prop.length; i < len; i++) {
+					if (_DEV_) {
+						if (!model.has(prop[i])) {
+							throw new Error('Undefined model ' + JSON.stringify(prop));
+						}
+					}
+
 					model = model.model(prop[i]);
 				}
 
 				return model;
+			}
+
+			if (_DEV_) {
+				if (!this.has(prop)) {
+					throw new Error('Undefined model ' + JSON.stringify(prop));
+				}
 			}
 
 			var source = this.get(prop),
@@ -1019,14 +1033,20 @@
 			if (options.dataIndexProp) {
 				updateDataIndexProp();
 			}
+
+			itemView.trigger('added');
 		}
 
 		function remove(item, index) {
+			var itemView = views.get(index);
+
+			itemView.trigger('removing');
+
 			if (options.remove) {
-				options.remove.call(view, root, views.get(index), index);
+				options.remove.call(view, root, itemView, index);
 			}
 			else {
-				views.get(index).remove();
+				itemView.remove();
 			}
 
 			views.removeAt(index);
