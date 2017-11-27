@@ -857,6 +857,16 @@
 				nodeProp = nodeProp[0];
 			}
 
+			var wrapper;
+
+			if (viewProp.indexOf('|') > -1) {
+				viewProp = viewProp.split('|');
+				if (viewProp[1] === 'number') {
+					wrapper = Number;
+				}
+				viewProp = viewProp[0];
+			}
+
 			var path = viewProp;
 
 			if (viewProp.indexOf('.') > -1) {
@@ -864,7 +874,8 @@
 			}
 
 			view.listenOn(node, event, function () {
-				view.set(path, node.prop(nodeProp));
+				var value = node.prop(nodeProp);
+				view.set(path, wrapper ? wrapper(value) : value);
 			});
 
 			view.on('@' + viewProp, function (value) {

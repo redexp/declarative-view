@@ -54,4 +54,31 @@ describe('connect helper', function () {
 		view.node.prop('id', 'value2').change();
 		expect(view.data.test.user.name).to.equal('value2');
 	});
+
+	it('should handle |number', function () {
+		var view = new DeclarativeView({
+			data: {
+				user: {
+					name: 'value'
+				}
+			},
+			template: {
+				'@root': {
+					connect: {
+						'id': 'user.name|number'
+					}
+				}
+			}
+		});
+
+		expect(view.node).to.have.prop('id', 'value');
+		view.node.prop('id', '1').change();
+		expect(view.data.user.name).to.be.a('number');
+		expect(view.data.user.name).to.equal(1);
+		view.model('user').set('name', 2);
+		expect(view.node).to.have.prop('id', '2');
+		view.node.prop('id', '3').change();
+		expect(view.data.user.name).to.be.a('number');
+		expect(view.data.user.name).to.equal(3);
+	});
 });
