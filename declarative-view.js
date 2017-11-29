@@ -938,7 +938,7 @@
 			prop = options.prop,
 			list = view.model(typeof prop === 'string' && prop.indexOf('.') > -1 ? prop.split('.') : prop),
 			views = new ViewsList([]),
-			tplSelector = options.node === false ? false : options.node || '> *';
+			tplSelector = options.node === false ? false : options.node || root.children();
 
 		if (_DEV_) {
 			if (!list) {
@@ -946,7 +946,31 @@
 			}
 		}
 
-		var tpl = tplSelector === false ? null : typeof tplSelector === 'string' && tplSelector.charAt(0) !== '<' ? root.find(tplSelector) : $(tplSelector);
+		var tpl;
+
+		if (tplSelector === false) {
+			tpl = null;
+		}
+		else if (typeof tplSelector === 'string') {
+			var char = tplSelector.charAt(0);
+			if (char === '<') {
+				tpl = $(tplSelector);
+			}
+			else if (char === '>' && tplSelector.indexOf(',') === -1) {
+				tpl = root.children();
+				tplSelector = tplSelector.slice(1).trim();
+				if (tplSelector !== '*') {
+					tpl = tpl.filter(tplSelector);
+				}
+			}
+			else {
+				tpl = root.find(tplSelector);
+			}
+		}
+		else {
+			tpl = $(tplSelector);
+		}
+
 		if (tpl) {
 			tpl.detach();
 			if (options.removeClass) {
