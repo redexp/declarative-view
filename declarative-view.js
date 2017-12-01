@@ -50,7 +50,7 @@
 				if (!event) return;
 
 				if (event === '>') {
-					callback();
+					callback.call(context || view);
 					return;
 				}
 
@@ -92,7 +92,7 @@
 				}
 
 				if (eq || a) {
-					wrapper(view.get(prop));
+					wrapper.call(context || view, view.get(prop));
 				}
 
 				if (eq) return;

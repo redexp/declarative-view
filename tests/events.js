@@ -306,6 +306,7 @@ describe('Events', function () {
 
     	view.on('> event', cb);
 		expect(cb).to.have.callCount(1);
+		expect(cb).to.be.calledOn(view);
 		view.trigger('event');
 		expect(cb).to.have.callCount(2);
 
