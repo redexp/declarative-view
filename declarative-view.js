@@ -56,7 +56,8 @@
 
 				var wrapper = callback,
 					not = false,
-					prop;
+					prop,
+					value;
 
 				if (event.charAt(0) === '!') {
 					not = true;
@@ -71,6 +72,7 @@
 
 				if (eq || p || a) {
 					prop = event.slice(1).split('.');
+					value = view.get(prop);
 				}
 
 				if (not || prop) {
@@ -92,15 +94,14 @@
 				}
 
 				if (eq || a) {
-					wrapper.call(context || view, view.get(prop));
+					wrapper.call(context || view, value);
 				}
 
 				if (eq) return;
 
 				if (p || a) {
-					var model = modelByProp(view, prop);
-
-					if (view !== model) {
+					if (prop.length > 1 || value instanceof Array) {
+						var model = modelByProp(view, prop);
 						event = model instanceof ArrayWrapper ? 'change' : 'set/' + lastItem(prop);
 						view.listenOn(model, event, wrapper);
 						return;

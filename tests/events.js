@@ -316,4 +316,21 @@ describe('Events', function () {
 		view.set('prop2', 4);
 		expect(view.node).to.have.text('7');
     });
+
+    it('should handle set/prop on prop as object', function () {
+    	var view = new DeclarativeView({
+			data: {
+				value: {type: 'test'}
+			}
+		});
+
+    	var cb = sinon.spy();
+
+    	view.on('@value', cb);
+    	expect(cb).to.have.callCount(1);
+    	expect(cb).to.be.calledWith(view.data.value);
+    	view.set('value', {type: 'none'});
+		expect(cb).to.have.callCount(2);
+		expect(cb).to.be.calledWith(view.data.value);
+    });
 });
