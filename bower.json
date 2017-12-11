@@ -1,7 +1,7 @@
 {
   "name": "declarative-view",
   "main": "declarative-view.js",
-  "version": "1.27.3",
+  "version": "1.27.4",
   "homepage": "https://github.com/redexp/declarative-view",
   "authors": [
     "Sergii Kliuchnyk"
